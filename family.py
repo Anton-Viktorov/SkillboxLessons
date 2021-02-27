@@ -1,5 +1,7 @@
 from termcolor import cprint
 
+# Test commit
+
 
 class House:
     """Создаем объект: дом"""
