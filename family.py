@@ -1,7 +1,5 @@
 from termcolor import cprint
 
-# Test commit # another commit from github
-
 
 class House:
     """Создаем объект: дом"""
@@ -39,13 +37,10 @@ class Being:
         print(f"{self.name} eating. Fullness + {portion}")
 
     def is_alive(self):
-        # TODO: еще одна хитрость.
+        return self.fullness > 0
+        # TO DO: еще одна хитрость.
         #  "self.fullness > 0" сам по себе дает True|False. Нам не нужен if|else, можно сравнение
         #  подставить сразу в return
-        if self.fullness > 0:
-            return True
-        else:
-            return False
 
 
 class Husband(Being):
@@ -59,14 +54,10 @@ class Husband(Being):
         return f"Муж. {super().__str__()}, happiness level: {self.happiness_level}"
 
     def is_alive(self):
-        # TODO: упростить. if должен ичезнуть.
+        return super().is_alive() and self.happiness_level > 10
+        # TO DO: упростить. if должен ичезнуть.
         #  Использование super().is_alive() - хорошо!
-        if super().is_alive() and self.happiness_level > 10:
-            return True
-        else:
-            return False
 
-        # TODO: еще одна фишка:
         #  and как и or очень сильно оптимизированы. Если and видит, что первый операнд дает False, то он не будет
         #  проверять правый операнд. Пример:
         #       False and 1 / 0
@@ -78,25 +69,32 @@ class Husband(Being):
         #  Но можно так:
         #       x = val_1 or val_2  # если val_1 будет ~True, То в x сохранится val_1.
         #                           # если val_1 будет похож на False, то сохранится val_2
-        x = 100500 or 123       # 100500
-        y = None or 123         # 123
-        # TODO: проверь в интепрераторе вручную, чтобы запомнить.
+        # x = 100500 or 123       # 100500
+        # y = None or 123         # 123
+        # TO DO: проверь в интепрераторе вручную, чтобы запомнить.
+
+        # Проверил, даже написал ф-ию для теста
+        # def some(z):
+        #     return z > 1
+        #
+        # z = 1
+        #
+        # y = some(z) or 123
+        #
+        # print('y =', y) y = 123. Если z > 1, то y = True
 
     def act(self):
         if self.home.dust_amt >= 90:
             self.happiness_level -= 10  # Проверяем насколько грязно дома
 
-        if self.fullness <= 10:
+        if self.fullness <= 20:
             self.eat()
-            return
-
-        if self.happiness_level <= 20:
+        elif self.happiness_level <= 20:
             self.gaming()
-            return
+        else:
+            self.work()
 
-        self.work()
-
-        # TODO: проще все объединить через if/elif/else, чтобы не писать return внутри каждого if`а.
+        # TO DO: проще все объединить через if/elif/else, чтобы не писать return внутри каждого if`а.
 
     def work(self):
         self.fullness -= 10
@@ -122,10 +120,7 @@ class Wife(Being):
         return f"Жена. {super().__str__()}, happiness level: {self.happiness_level}"
 
     def is_alive(self):
-        if super().is_alive() and self.happiness_level > 10:
-            return True
-        else:
-            return False
+        return super().is_alive() and self.happiness_level > 10
 
     def act(self):
         if self.home.dust_amt >= 90:
@@ -133,13 +128,12 @@ class Wife(Being):
 
         if self.fullness <= 20:
             self.eat()
-            return
-
-        if self.happiness_level <= 20 and self.home.money > 350:  # Хватит ли денег на шубу
+        elif self.happiness_level <= 20 and self.home.money > 350:
             self.buy_fur_coat()
-            return
-
-        self.clean_house()
+        elif self.home.fridge < 60:
+            self.shopping()
+        else:
+            self.clean_house()
 
     def shopping(self):
         self.fullness -= 10
@@ -168,32 +162,35 @@ masha = Wife(name='Маша', home=home1)
 for day in range(365):
     cprint('================== День {} =================='.format(day), color='red')
     home1.dust_append()
-    if serge.is_alive():
+    # Хотел пихнуть сюда all(). Не зря же ты про нее сказал.
+    # Но с ней питон отказался работать почему-то.
+    if serge.is_alive() and masha.is_alive():
         serge.act()
-    else:
-        cprint(f"{serge.name} умер. Помним, любим, скорбим...", color='red')
-
-    if masha.is_alive():
         masha.act()
     else:
-        cprint(f"{masha.name} умерла. Помним, любим, скорбим...", color='red')
-
-    # Я не уверен в if-ах которые написал выше. В том, что они грамотно подходят. Поэтому думал сделать такую штуку.
-    # Однако в этой ситуации будет проблематично понять, кто именно умер.
-    # if serge.is_alive() and masha.is_alive():
-    #     serge.act()
-    #     masha.act()
-    # else:
-    #     print(f"Один из членов семьи умер.")
-
-    # TODO: согласен. Стремнова-то. Вариант выше выглядит симпатично. Можешь его сделать основным.
-    #  Но в дальнейшем мы сделаем другой вариант.
+        print(f"Один из членов семьи умер.")
 
     cprint(serge, color='cyan')
     cprint(masha, color='cyan')
 
-cprint(f"{serge.name} заработал {home1.total_bank} за год", color='red')
-cprint(f"{masha.name} купила {masha.fur_coat_collection} шуб за год", color='red')
+    cprint(f"{serge.name} заработал {home1.total_bank} за год", color='red')
+    cprint(f"{masha.name} купила {masha.fur_coat_collection} шуб за год", color='red')
+
+    # if serge.is_alive():
+    #     serge.act()
+    # else:
+    #     cprint(f"{serge.name} умер. Помним, любим, скорбим...", color='red')
+    #
+    # if masha.is_alive():
+    #     masha.act()
+    # else:
+    #     cprint(f"{masha.name} умерла. Помним, любим, скорбим...", color='red')
+
+    # Я не уверен в if-ах которые написал выше. В том, что они грамотно подходят. Поэтому думал сделать такую штуку.
+    # Однако в этой ситуации будет проблематично понять, кто именно умер.
+
+    # TO DO: согласен. Стремнова-то. Вариант выше выглядит симпатично. Можешь его сделать основным.
+    #  Но в дальнейшем мы сделаем другой вариант.
 
 # TO DO: пусть если грази меньше чем 100, но она есть, мы будем убирать сколько есть.
 #  .
