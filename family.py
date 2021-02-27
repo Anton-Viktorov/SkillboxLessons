@@ -83,6 +83,8 @@ class Husband(Being):
         #
         # print('y =', y) y = 123. Если z > 1, то y = True
 
+        # TODO: все верно.
+
     def act(self):
         if self.home.dust_amt >= 90:
             self.happiness_level -= 10  # Проверяем насколько грязно дома
@@ -93,8 +95,6 @@ class Husband(Being):
             self.gaming()
         else:
             self.work()
-
-        # TO DO: проще все объединить через if/elif/else, чтобы не писать return внутри каждого if`а.
 
     def work(self):
         self.fullness -= 10
@@ -164,6 +164,10 @@ for day in range(365):
     home1.dust_append()
     # Хотел пихнуть сюда all(). Не зря же ты про нее сказал.
     # Но с ней питон отказался работать почему-то.
+
+    # TODO: сказал не зря. Но тут он не нужен. При этом all работает с итерируемыми объектами (список/кортеж/слова),
+    #  т.е. ему нужно передать список/словарь/кортеж. Два отдельных значения ему не передашь.
+    #  if all([serge.is_alive(), masha.is_alive()]):        # но это сильно упрощает жизнь, поэтому тут не нужен.
     if serge.is_alive() and masha.is_alive():
         serge.act()
         masha.act()
@@ -176,21 +180,7 @@ for day in range(365):
     cprint(f"{serge.name} заработал {home1.total_bank} за год", color='red')
     cprint(f"{masha.name} купила {masha.fur_coat_collection} шуб за год", color='red')
 
-    # if serge.is_alive():
-    #     serge.act()
-    # else:
-    #     cprint(f"{serge.name} умер. Помним, любим, скорбим...", color='red')
-    #
-    # if masha.is_alive():
-    #     masha.act()
-    # else:
-    #     cprint(f"{masha.name} умерла. Помним, любим, скорбим...", color='red')
 
-    # Я не уверен в if-ах которые написал выше. В том, что они грамотно подходят. Поэтому думал сделать такую штуку.
-    # Однако в этой ситуации будет проблематично понять, кто именно умер.
-
-    # TO DO: согласен. Стремнова-то. Вариант выше выглядит симпатично. Можешь его сделать основным.
-    #  Но в дальнейшем мы сделаем другой вариант.
 
 # TO DO: пусть если грази меньше чем 100, но она есть, мы будем убирать сколько есть.
 #  .
