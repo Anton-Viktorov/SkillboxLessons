@@ -1,8 +1,11 @@
 from termcolor import cprint
+import random
 
 
 class House:
     """Создаем объект: дом"""
+
+    cat_food = 30
 
     def __init__(self):
         self.money = 100
@@ -38,9 +41,6 @@ class Being:
 
     def is_alive(self):
         return self.fullness > 0
-        # TO DO: еще одна хитрость.
-        #  "self.fullness > 0" сам по себе дает True|False. Нам не нужен if|else, можно сравнение
-        #  подставить сразу в return
 
 
 class Husband(Being):
@@ -55,35 +55,6 @@ class Husband(Being):
 
     def is_alive(self):
         return super().is_alive() and self.happiness_level > 10
-        # TO DO: упростить. if должен ичезнуть.
-        #  Использование super().is_alive() - хорошо!
-
-        #  and как и or очень сильно оптимизированы. Если and видит, что первый операнд дает False, то он не будет
-        #  проверять правый операнд. Пример:
-        #       False and 1 / 0
-        #       None and 1 / 0      # ошибки нет
-        #  .
-        #  Для or такая же тема, но используется в другом контексте:
-        #       True or 1 / 0       # если слева Тру, он не будет смотреть правую часть
-        #  .
-        #  Но можно так:
-        #       x = val_1 or val_2  # если val_1 будет ~True, То в x сохранится val_1.
-        #                           # если val_1 будет похож на False, то сохранится val_2
-        # x = 100500 or 123       # 100500
-        # y = None or 123         # 123
-        # TO DO: проверь в интепрераторе вручную, чтобы запомнить.
-
-        # Проверил, даже написал ф-ию для теста
-        # def some(z):
-        #     return z > 1
-        #
-        # z = 1
-        #
-        # y = some(z) or 123
-        #
-        # print('y =', y) y = 123. Если z > 1, то y = True
-
-        # TODO: все верно.
 
     def act(self):
         if self.home.dust_amt >= 90:
@@ -93,6 +64,8 @@ class Husband(Being):
             self.eat()
         elif self.happiness_level <= 20:
             self.gaming()
+        elif self.happiness_level <= 30:
+            self.pet_the_cat()
         else:
             self.work()
 
@@ -106,6 +79,11 @@ class Husband(Being):
         self.fullness -= 10
         self.happiness_level += 20
         print(f"{self.name} playing WOT. Happiness + 20 ")
+
+    def pet_the_cat(self):
+        self.fullness -= 10
+        self.happiness_level += 5
+        print(f"{self.name} petting the cat ")
 
 
 class Wife(Being):
@@ -130,8 +108,12 @@ class Wife(Being):
             self.eat()
         elif self.happiness_level <= 20 and self.home.money > 350:
             self.buy_fur_coat()
+        elif self.happiness_level <= 20:
+            self.pet_the_cat()
         elif self.home.fridge < 60:
             self.shopping()
+        elif self.home.cat_food < 20:
+            self.buy_cat_food()
         else:
             self.clean_house()
 
@@ -141,6 +123,13 @@ class Wife(Being):
         self.home.fridge += food_pay
         self.home.money -= food_pay
         print(f"{self.name} shopping. Food in fridge + {food_pay}")
+
+    def buy_cat_food(self):
+        self.fullness -= 10
+        food_pay = min(20, self.home.money)
+        self.home.cat_food += food_pay
+        self.home.money -= food_pay
+        print(f"{self.name} buy cat food. Cat food + {food_pay}")
 
     def buy_fur_coat(self):
         self.fullness -= 10
@@ -154,33 +143,137 @@ class Wife(Being):
         self.home.dust_amt -= min(self.home.dust_amt, 100)
         print(f"{self.name} washes house")
 
+    def pet_the_cat(self):
+        self.fullness -= 10
+        self.happiness_level += 5
+        print(f"{self.name} petting the cat ")
+
+
+class Cat(Being):
+
+    def __str__(self):
+        return f"Кот. {super().__str__()}"
+
+    def act(self):
+        if self.fullness <= 10:
+            self.eat()
+        elif self.home.cat_food < 20:  # Была идея сделать через рандом, но решил, что это больше моделирует реальную
+            self.soil()  # ситуацию. Мол мало еды - кот беснуется и дерет обои.
+        else:
+            self.sleep()
+
+    def eat(self):  # Хотел дополнить eat в классе Being, но решил, что усложняет код. Решил переопределить.
+        portion = min(10, self.home.cat_food)
+        self.fullness += portion * 2
+        self.home.cat_food -= portion
+        print(f"{self.name} eating. Fullness + {portion * 2}")
+
+    def soil(self):
+        print(f"{self.name} tears wallpaper")
+        self.fullness -= 10
+        self.home.dust_amt += 5
+
+    def sleep(self):
+        print(f"{self.name} sleeping")
+        self.fullness -= 10
+
+
+class Child(Being):
+
+    happiness_level = 100
+
+    def __str__(self):
+        return f"{super().__str__()}, happiness_level = 100"
+
+    def act(self):
+        if self.fullness <= 20:
+            self.eat()
+        elif random.randint(1, 2) == 1:
+            self.pet_the_cat()
+        else:
+            self.sleep()
+
+    def eat(self):
+        portion = min(10, self.home.fridge)
+        self.fullness += portion
+        self.home.fridge -= portion
+        print(f"{self.name} eating. Fullness + {portion}")
+
+    def sleep(self):
+        self.fullness -= 10
+        print(f"{self.name} sleeping")
+
+    def pet_the_cat(self):
+        self.fullness -= 10
+        print(f"{self.name} petting the cat ")
+
 
 home1 = House()
 serge = Husband(name='Сережа', home=home1)
 masha = Wife(name='Маша', home=home1)
+murzik = Cat(name='Мурзик', home=home1)
+kolya = Child(name='Коля', home=home1)
 
 for day in range(365):
     cprint('================== День {} =================='.format(day), color='red')
     home1.dust_append()
-    # Хотел пихнуть сюда all(). Не зря же ты про нее сказал.
-    # Но с ней питон отказался работать почему-то.
 
-    # TODO: сказал не зря. Но тут он не нужен. При этом all работает с итерируемыми объектами (список/кортеж/слова),
-    #  т.е. ему нужно передать список/словарь/кортеж. Два отдельных значения ему не передашь.
-    #  if all([serge.is_alive(), masha.is_alive()]):        # но это сильно упрощает жизнь, поэтому тут не нужен.
-    if serge.is_alive() and masha.is_alive():
+    if all([serge.is_alive(), masha.is_alive(), kolya.is_alive(), murzik.is_alive()]):
         serge.act()
         masha.act()
+        murzik.act()
+        kolya.act()
     else:
         print(f"Один из членов семьи умер.")
 
     cprint(serge, color='cyan')
     cprint(masha, color='cyan')
+    cprint(kolya, color='cyan')
+    cprint(murzik, color='cyan')
 
-    cprint(f"{serge.name} заработал {home1.total_bank} за год", color='red')
-    cprint(f"{masha.name} купила {masha.fur_coat_collection} шуб за год", color='red')
+cprint(f"{serge.name} заработал {home1.total_bank} за год", color='red')
+cprint(f"{masha.name} купила {masha.fur_coat_collection} шуб за год", color='red')
 
+# Хотел пихнуть сюда all(). Не зря же ты про нее сказал.
+# Но с ней питон отказался работать почему-то.
 
+# TO DO: сказал не зря. Но тут он не нужен. При этом all работает с итерируемыми объектами (список/кортеж/слова),
+#  т.е. ему нужно передать список/ ия ему не передашь.
+#  if all([serge.is_alive(), masha.is_alive()]):        # но это сильно упрощает жизнь, поэтому тут не нужен.
+
+# TO DO: еще одна хитрость.
+#  "self.fullness > 0" сам по себе дает True|False. Нам не нужен if|else, можно сравнение
+#  подставить сразу в return
+
+# TO DO: упростить. if должен ичезнуть.
+#  Использование super().is_alive() - хорошо!
+
+#  and как и or очень сильно оптимизированы. Если and видит, что первый операнд дает False, то он не будет
+#  проверять правый операнд. Пример:
+#       False and 1 / 0
+#       None and 1 / 0      # ошибки нет
+#  .
+#  Для or такая же тема, но используется в другом контексте:
+#       True or 1 / 0       # если слева Тру, он не будет смотреть правую часть
+#  .
+#  Но можно так:
+#       x = val_1 or val_2  # если val_1 будет ~True, То в x сохранится val_1.
+#                           # если val_1 будет похож на False, то сохранится val_2
+# x = 100500 or 123       # 100500
+# y = None or 123         # 123
+# TO DO: проверь в интепрераторе вручную, чтобы запомнить.
+
+# Проверил, даже написал ф-ию для теста
+# def some(z):
+#     return z > 1
+#
+# z = 1
+#
+# y = some(z) or 123
+#
+# print('y =', y) y = 123. Если z > 1, то y = True
+
+# TO DO: все верно.
 
 # TO DO: пусть если грази меньше чем 100, но она есть, мы будем убирать сколько есть.
 #  .
