@@ -2,14 +2,16 @@ from termcolor import cprint
 import random
 
 
+CAT_FOOD = 'cat_food'
+HUMAN_FOOD = 'human_food'
+
+
 class House:
     """Создаем объект: дом"""
 
-    cat_food = 30
-
     def __init__(self):
         self.money = 100
-        self.fridge = 50
+        self.fridge = {HUMAN_FOOD: 50, CAT_FOOD: 30}
         self.dust_amt = 0
         self.total_bank = 0  # Общий банк. Сколько всего муж заработает за год.
 
@@ -22,41 +24,42 @@ class House:
         self.dust_amt += 5  # Уровень грязи в доме
 
 
-class Being:
+class Human:
     """Класс-родитель. Инициализирует модель чего-то живого(человека, кота и т.д.)"""
 
-    def __init__(self, name, home, fullness=30):
+    def __init__(self, name, home, portion, food_type, food_coef, fullness=30,):
         self.name = name
         self.fullness = fullness
         self.home = home
+        self.portion = portion
+        self.food_type = food_type
+        self.food_coef = food_coef
 
     def __str__(self):
         return f"Name: {self.name}, fullness: {self.fullness}"  # Выводим общую информацию об объекте
 
     def eat(self):
-        portion = min(30, self.home.fridge)
-        self.fullness += portion
-        self.home.fridge -= portion
-        print(f"{self.name} eating. Fullness + {portion}")
+        tmp_portion = min(self.portion, self.home.fridge[self.food_type])
+        self.fullness += tmp_portion * self.food_coef
+        self.home.fridge[self.food_type] -= tmp_portion
+        print(f"{self.name} eating. Fullness + {tmp_portion * self.food_coef}")
 
     def is_alive(self):
         return self.fullness > 0
 
 
-class Husband(Being):
+class Husband(Human):
     """Создаем объект: муж"""
 
     def __init__(self, name, home):
-        super().__init__(name=name, home=home)
-        # TODO: такое же поле у Жены
+        super().__init__(name=name, home=home, portion=30, food_coef=1, food_type=HUMAN_FOOD)
         self.happiness_level = 100
 
     def __str__(self):
         return f"Муж. {super().__str__()}, happiness level: {self.happiness_level}"
 
-    # TODO: такой же метод у Жены
     def is_alive(self):
-        return super().is_alive() and self.happiness_level > 10
+        return self.fullness > 0 and self.happiness_level > 10
 
     def act(self):
         if self.home.dust_amt >= 90:
@@ -88,19 +91,19 @@ class Husband(Being):
         print(f"{self.name} petting the cat ")
 
 
-class Wife(Being):
+class Wife(Human):
     """Создаем объект: жена"""
 
     def __init__(self, name, home):
-        super().__init__(name=name, home=home)
+        super().__init__(name=name, home=home, portion=30, food_coef=1, food_type=HUMAN_FOOD)
         self.happiness_level = 100
-        self.fur_coat_collection = 0  # Коллекция шуб жены. Для подсчета суммы купленных шуб.
+        self.fur_coat_collection = 0
 
     def __str__(self):
         return f"Жена. {super().__str__()}, happiness level: {self.happiness_level}"
 
     def is_alive(self):
-        return super().is_alive() and self.happiness_level > 10
+        return self.fullness > 0 and self.happiness_level > 10
 
     def act(self):
         if self.home.dust_amt >= 90:
@@ -112,9 +115,9 @@ class Wife(Being):
             self.buy_fur_coat()
         elif self.happiness_level <= 20:
             self.pet_the_cat()
-        elif self.home.fridge < 60:
+        elif self.home.fridge[HUMAN_FOOD] < 60:
             self.shopping()
-        elif self.home.cat_food < 20:
+        elif self.home.fridge[CAT_FOOD] < 20:
             self.buy_cat_food()
         else:
             self.clean_house()
@@ -122,14 +125,14 @@ class Wife(Being):
     def shopping(self):
         self.fullness -= 10
         food_pay = min(60, self.home.money)
-        self.home.fridge += food_pay
+        self.home.fridge[HUMAN_FOOD] += food_pay
         self.home.money -= food_pay
         print(f"{self.name} shopping. Food in fridge + {food_pay}")
 
     def buy_cat_food(self):
         self.fullness -= 10
         food_pay = min(20, self.home.money)
-        self.home.cat_food += food_pay
+        self.home.fridge[CAT_FOOD] += food_pay
         self.home.money -= food_pay
         print(f"{self.name} buy cat food. Cat food + {food_pay}")
 
@@ -150,10 +153,11 @@ class Wife(Being):
         self.happiness_level += 5
         print(f"{self.name} petting the cat ")
 
-# TODO: мужу с женой, да и ребенку, пригодился бы класс Человек.
 
+class Cat(Human):
 
-class Cat(Being):
+    def __init__(self, name, home):
+        super(Cat, self).__init__(name=name, home=home, portion=10, food_coef=2, food_type=CAT_FOOD)
 
     def __str__(self):
         return f"Кот. {super().__str__()}"
@@ -161,18 +165,10 @@ class Cat(Being):
     def act(self):
         if self.fullness <= 10:
             self.eat()
-        elif self.home.cat_food < 20:  # Была идея сделать через рандом, но решил, что это больше моделирует реальную
-            self.soil()  # ситуацию. Мол мало еды - кот беснуется и дерет обои.     # TODO: норм)
+        elif self.home.fridge[self.food_type] < 20:
+            self.soil()
         else:
             self.sleep()
-
-    # Хотел дополнить eat в классе Being, но решил, что усложняет код. Решил переопределить.
-    # TODO: а как бы ты его дополнил? через тип объекта проверял бы кто вызвал eat, чтобы отнимать от нужного поля?
-    def eat(self):
-        portion = min(10, self.home.cat_food)
-        self.fullness += portion * 2
-        self.home.cat_food -= portion
-        print(f"{self.name} eating. Fullness + {portion * 2}")
 
     def soil(self):
         print(f"{self.name} tears wallpaper")
@@ -184,12 +180,15 @@ class Cat(Being):
         self.fullness -= 10
 
 
-class Child(Being):
+class Child(Human):
 
     happiness_level = 100
 
+    def __init__(self, name, home):
+        super().__init__(name=name, home=home, portion=10, food_coef=1, food_type=HUMAN_FOOD)
+
     def __str__(self):
-        return f"{super().__str__()}, happiness_level = 100"
+        return f"Ребенок. {super().__str__()}, happiness_level = 100"
 
     def act(self):
         if self.fullness <= 20:
@@ -199,13 +198,6 @@ class Child(Being):
         else:
             self.sleep()
 
-    # TODO: Отличается от Мужа и Жены одной цифрой.
-    def eat(self):
-        portion = min(10, self.home.fridge)
-        self.fullness += portion
-        self.home.fridge -= portion
-        print(f"{self.name} eating. Fullness + {portion}")
-
     def sleep(self):
         self.fullness -= 10
         print(f"{self.name} sleeping")
@@ -213,37 +205,6 @@ class Child(Being):
     def pet_the_cat(self):
         self.fullness -= 10
         print(f"{self.name} petting the cat ")
-
-# TODO: Общий класс с Child.
-#  Надо изменить Родительский класс, и лучше сделать его Human, таким образом, чтобы его конструктор принимал
-#  параметр "прожорливость", т.о. мы будем иметь возможность установить максимальной размер съедаемой за раз порции.
-#  Внутри же конструкторов Муж/Жена/Ребенок, когда мы будем вызывать super() класса-Родителя, у нас будет жестко,
-#  числом, задаваться параметр "прожорливости".
-#  .
-#  Т.о. конструктор: РодительскиКласс(..., прожоливость). А классы-наследники такого параметра не имеют.
-#  .
-#  В итоге, метод eat() будет только у Родительского класса. Этот метод будет использовать поле "прожорливость" у каждого объекта,
-#  Все классы-наследники будут устаналивать это поле, когда будут вызывать конструктор Human в своем собственному конструкторе.
-#  Обрати внимание, сделать Child(, прожорливость=100500) будет нельзя, т.к. Child не будет иметь параметра "прожорливость",
-#  он будет его жестко задавать в собственном конструкторе:
-#       super().__init__(..., прожоливость=10).
-
-
-# TODO: Общий класс с Cat.
-#  Вообще с котом мы способны на большее.
-#  В классе Дом лучше вместо полей "кошачья еда" и "человеческая еда"
-#  ввести поле "холодильник", которое может быть словарем с 2 ключами: "кошачья еда" и ...;
-#  Так же лучше создать глобальные, вне классов, константы CAT_FOOD = 'cat_food' и ... Что будут играть роль ключей в этом
-#  холодильнике. При создании объекта Cat конструктор класса будет вызывать конструктор Общего класса, который будет
-#  принимать на вход "тип пищи", который кушает создаваемый объект.
-#  .
-#  А в методе eat() просто будет по умолчанию брать "тип пищи" из холодильника и отниматься от нужной пищи.
-#  .
-#  Сейчас наша главная задача при проектировании классов: сделать так, чтобы все общие части попали в классы-родителей.
-#  а классы-наследники будут наследовать общий код.
-
-
-# TODO: поля которые напрашиваются: размер порции, тип еды и коэф.насыщения (у кота == 2)
 
 
 home1 = House()
@@ -254,16 +215,17 @@ kolya = Child(name='Коля', home=home1)
 
 for day in range(365):
     cprint('================== День {} =================='.format(day), color='red')
+
     home1.dust_append()
 
-    if all([serge.is_alive(), masha.is_alive(), kolya.is_alive(), murzik.is_alive()]):
+    if all([serge.is_alive(), masha.is_alive, kolya.is_alive(), murzik.is_alive()]):
         serge.act()
         masha.act()
         murzik.act()
         kolya.act()
     else:
         print(f"Один из членов семьи умер.")
-        # TODO: добавить прерывание
+        break
 
     cprint(serge, color='cyan')
     cprint(masha, color='cyan')
@@ -272,6 +234,48 @@ for day in range(365):
 
 cprint(f"{serge.name} заработал {home1.total_bank} за год", color='red')
 cprint(f"{masha.name} купила {masha.fur_coat_collection} шуб за год", color='red')
+
+
+# TO DO: добавить прерывание
+
+# Хотел дополнить eat в классе Being, но решил, что усложняет код. Решил переопределить.
+# TO DO: а как бы ты его дополнил? через тип объекта проверял бы кто вызвал eat, чтобы отнимать от нужного поля?
+# Ну да. Изначально хотел через isinstance, но ты же сказал, что это моветон. Поэтому я сделал отдельный метод.
+
+# TODO: Общий класс с Child.
+#  Надо изменить Родительский класс, и лучше сделать его Human, таким образом, чтобы его конструктор принимал
+#  параметр "прожорливость", т.о. мы будем иметь возможность установить максимальной размер съедаемой за раз порции.
+#  Внутри же конструкторов Муж/Жена/Ребенок, когда мы будем вызывать super() класса-Родителя, у нас будет жестко,
+#  числом, задаваться параметр "прожорливости".
+#  .
+#  Т.о. конструктор: РодительскиКласс(..., прожоливость). А классы-наследники такого параметра не имеют.
+#  .
+#  В итоге, метод eat() будет только у Родительского класса. Этот метод будет использовать поле "прожорливость"
+#  у каждого объекта,
+#  Все классы-наследники будут устаналивать это поле, когда будут вызывать конструктор Human в своем собственному
+#  конструкторе.
+#  Обрати внимание, сделать Child(, прожорливость=100500) будет нельзя, т.к. Child не будет иметь параметра
+#  "прожорливость",
+#  он будет его жестко задавать в собственном конструкторе:
+#       super().__init__(..., прожоливость=10).
+
+
+# TODO: Общий класс с Cat.
+#  Вообще с котом мы способны на большее.
+#  В классе Дом лучше вместо полей "кошачья еда" и "человеческая еда"
+#  ввести поле "холодильник", которое может быть словарем с 2 ключами: "кошачья еда" и ...;
+#  Так же лучше создать глобальные, вне классов, константы CAT_FOOD = 'cat_food' и ... Что будут играть роль ключей
+#  в этом
+#  холодильнике. При создании объекта Cat конструктор класса будет вызывать конструктор Общего класса, который будет
+#  принимать на вход "тип пищи", который кушает создаваемый объект.
+#  .
+#  А в методе eat() просто будет по умолчанию брать "тип пищи" из холодильника и отниматься от нужной пищи.
+#  .
+#  Сейчас наша главная задача при проектировании классов: сделать так, чтобы все общие части попали в классы-родителей.
+#  а классы-наследники будут наследовать общий код.
+
+
+# TODO: поля которые напрашиваются: размер порции, тип еды и коэф.насыщения (у кота == 2)
 
 # Хотел пихнуть сюда all(). Не зря же ты про нее сказал.
 # Но с ней питон отказался работать почему-то.
