@@ -1,7 +1,7 @@
 from termcolor import cprint
 import random
 
-# TODO: сделал и правильно использовал (по коду нигде нет 'cat_food' или 'human_food').
+# TO DO: сделал и правильно использовал (по коду нигде нет 'cat_food' или 'human_food').
 CAT_FOOD = 'cat_food'
 HUMAN_FOOD = 'human_food'
 
@@ -24,10 +24,10 @@ class House:
         self.dust_amt += 5  # Уровень грязи в доме
 
 
-class Human:
+class Mammal:
     """Класс-родитель. Инициализирует модель чего-то живого(человека, кота и т.д.)"""
 
-    def __init__(self, name, home, portion, food_type, food_coef, fullness=30,):        # TODO: запятая?
+    def __init__(self, name, home, portion, food_type, food_coef, fullness=30):        # TO DO: запятая? / Случайно
         self.name = name
         self.fullness = fullness
         self.home = home
@@ -48,37 +48,39 @@ class Human:
         return self.fullness > 0
 
 
+class Human(Mammal):
+
+    def __init__(self, name, home, portion):
+        super().__init__(name=name, home=home, portion=portion, food_type=HUMAN_FOOD, food_coef=1)
+        self.happiness_level = 100
+
+    def __str__(self):
+        return f"{super().__str__()}, happiness level: {self.happiness_level}"
+
+    def is_alive(self):
+        return all([super().is_alive(), self.happiness_level > 10])
+
+    def mood_drop(self):
+        if self.home.dust_amt >= 90:
+            self.happiness_level -= 10
+
+    def pet_the_cat(self):
+        self.fullness -= 10
+        self.happiness_level += 5
+        print(f"{self.name} petting the cat ")
+
+
 class Husband(Human):
     """Создаем объект: муж"""
 
     def __init__(self, name, home):
-        super().__init__(name=name, home=home, portion=30, food_coef=1, food_type=HUMAN_FOOD)
-        # TODO: такое же поле у Жены. И у Ребенка.
-        #  В целом то, что у Ребенка сделал поле класса - неплохой ход. Но лично я бы выбрал сделать happiness_level
-        #  полем для всех Human. Ну потому что это их характеристика, понимаешь? У нас может появиться класс Подросток,
-        #  или Бабушка/Дедушка, и у каждого будет поле "уровень счастья". Поэтому, раз оно у всех, я бы его вынес
-        #  в родителя. При этом, если у нас есть необходимость снижать счастье, можно сделать у родителя метод
-        #  "уменьшить_счастье(количество)", а у Ребенка этот метод перегрузить, чтобы для него уменьшение счастья не
-        #  работало вовсе. Получится, если потребуется добавить еще какой-то вид Человеков, то у них по умолчанию
-        #  будет и счастья и метод по его уменьшению, который можно перегрузить, настроив по своему.
-        self.happiness_level = 100
+        super().__init__(name=name, home=home, portion=30)
 
     def __str__(self):
-        return f"Муж. {super().__str__()}, happiness level: {self.happiness_level}"
-
-    def is_alive(self):
-        # TODO: вариант ниже был хорош, потому что использовал "super().is_alive()":
-        #           return super().is_alive() and self.happiness_level > 10
-        #  Если способ изменения сытости изменится, то метод выше менять не надо, а текущая версия потребует пройти
-        #  по коду и позаменять "self.fullness > 0" на что-то другое.
-        #  .
-        #  А если еще и сделать правку с уровнем счастья, то у нас is_alive станет общим для всех людей.
-        #  Тоже профит..
-        return self.fullness > 0 and self.happiness_level > 10
+        return f"Муж. {super().__str__()}"
 
     def act(self):
-        if self.home.dust_amt >= 90:
-            self.happiness_level -= 10  # Проверяем насколько грязно дома
+        self.mood_drop()
 
         if self.fullness <= 20:
             self.eat()
@@ -100,31 +102,19 @@ class Husband(Human):
         self.happiness_level += 20
         print(f"{self.name} playing WOT. Happiness + 20 ")
 
-    def pet_the_cat(self):
-        self.fullness -= 10
-        self.happiness_level += 5
-        print(f"{self.name} petting the cat ")
-
 
 class Wife(Human):
     """Создаем объект: жена"""
 
     def __init__(self, name, home):
-        super().__init__(name=name, home=home, portion=30, food_coef=1, food_type=HUMAN_FOOD)
-        # TODO: вот оно счастье. Дублируется.
-        self.happiness_level = 100
+        super().__init__(name=name, home=home, portion=30)
         self.fur_coat_collection = 0
 
     def __str__(self):
-        return f"Жена. {super().__str__()}, happiness level: {self.happiness_level}"
-
-    # TODO и проверка дублируется.
-    def is_alive(self):
-        return self.fullness > 0 and self.happiness_level > 10
+        return f"Жена. {super().__str__()}"
 
     def act(self):
-        if self.home.dust_amt >= 90:
-            self.happiness_level -= 10  # Проверяем насколько грязно дома
+        self.mood_drop()
 
         if self.fullness <= 20:
             self.eat()
@@ -165,26 +155,10 @@ class Wife(Human):
         self.home.dust_amt -= min(self.home.dust_amt, 100)
         print(f"{self.name} washes house")
 
-    def pet_the_cat(self):
-        self.fullness -= 10
-        self.happiness_level += 5
-        print(f"{self.name} petting the cat ")
 
-
-# TODO: не не не не!!!
-#  класс Being, или если отталкиваться к биологии, то лучше Mammal - это был общий родитель для Кота и Человека.
-#  А теперь кот наследуется от Человека. Наверное самого смутил этот момент?
-#  .
-#  Трушно так: у нас есть общий предок, допустим Mammal (отсылка к биологии, но если больше нравится - Being),
-#  от него наследуются Кот и Человек. Все что общее между котом и человеком уходит в Mammal. У Mammal нет счастья,
-#  но есть например понятие "сытость" и "есть" (и не только, подумай). Но класс не шибко большой.
-#  .
-#  Потом от него Cat и Human...
-class Cat(Human):
+class Cat(Mammal):
 
     def __init__(self, name, home):
-        # TODO: тут я отправлю аудио (это не совсем кошерно если смотреть на самые высокие каноны, но
-        #  если исходить из пратичности - это умеренное зло. В аудио подробнее).
         super(Cat, self).__init__(name=name, home=home, portion=10, food_coef=2, food_type=CAT_FOOD)
 
     def __str__(self):
@@ -210,13 +184,17 @@ class Cat(Human):
 
 class Child(Human):
 
-    happiness_level = 100
-
     def __init__(self, name, home):
-        super().__init__(name=name, home=home, portion=10, food_coef=1, food_type=HUMAN_FOOD)
+        super().__init__(name=name, home=home, portion=10)
 
     def __str__(self):
-        return f"Ребенок. {super().__str__()}, happiness_level = 100"
+        return f"Ребенок. {super().__str__()}"
+    
+    def is_alive(self):
+        return self.fullness > 0
+
+    def mood_drop(self):
+        pass
 
     def act(self):
         if self.fullness <= 20:
@@ -241,16 +219,16 @@ masha = Wife(name='Маша', home=home1)
 murzik = Cat(name='Мурзик', home=home1)
 kolya = Child(name='Коля', home=home1)
 
+family = [serge, masha, murzik, kolya]
+
 for day in range(365):
     cprint('================== День {} =================='.format(day), color='red')
 
     home1.dust_append()
 
     if all([serge.is_alive(), masha.is_alive, kolya.is_alive(), murzik.is_alive()]):
-        serge.act()
-        masha.act()
-        murzik.act()
-        kolya.act()
+        for x in family:
+            x.act()
     else:
         print(f"Один из членов семьи умер.")
         break
@@ -263,6 +241,37 @@ for day in range(365):
 cprint(f"{serge.name} заработал {home1.total_bank} за год", color='red')
 cprint(f"{masha.name} купила {masha.fur_coat_collection} шуб за год", color='red')
 
+# TO DO: не не не не!!!
+#  класс Being, или если отталкиваться к биологии, то лучше Mammal - это был общий родитель для Кота и Человека.
+#  А теперь кот наследуется от Человека. Наверное самого смутил этот момент?
+#  .
+#  Трушно так: у нас есть общий предок, допустим Mammal (отсылка к биологии, но если больше нравится - Being),
+#  от него наследуются Кот и Человек. Все что общее между котом и человеком уходит в Mammal. У Mammal нет счастья,
+#  но есть например понятие "сытость" и "есть" (и не только, подумай). Но класс не шибко большой.
+#  .
+#  Потом от него Cat и Human...
+
+# TO DO: тут я отправлю аудио (это не совсем кошерно если смотреть на самые высокие каноны, но
+#  если исходить из пратичности - это умеренное зло. В аудио подробнее).
+
+# TO DO: вот оно счастье. Дублируется.
+
+# TO DO: вариант ниже был хорош, потому что использовал "super().is_alive()":
+#           return super().is_alive() and self.happiness_level > 10
+#  Если способ изменения сытости изменится, то метод выше менять не надо, а текущая версия потребует пройти
+#  по коду и позаменять "self.fullness > 0" на что-то другое.
+#  .
+#  А если еще и сделать правку с уровнем счастья, то у нас is_alive станет общим для всех людей.
+#  Тоже профит..
+
+# TO DO: такое же поле у Жены. И у Ребенка.
+#  В целом то, что у Ребенка сделал поле класса - неплохой ход. Но лично я бы выбрал сделать happiness_level
+#  полем для всех Human. Ну потому что это их характеристика, понимаешь? У нас может появиться класс Подросток,
+#  или Бабушка/Дедушка, и у каждого будет поле "уровень счастья". Поэтому, раз оно у всех, я бы его вынес
+#  в родителя. При этом, если у нас есть необходимость снижать счастье, можно сделать у родителя метод
+#  "уменьшить_счастье(количество)", а у Ребенка этот метод перегрузить, чтобы для него уменьшение счастья не
+#  работало вовсе. Получится, если потребуется добавить еще какой-то вид Человеков, то у них по умолчанию
+#  будет и счастья и метод по его уменьшению, который можно перегрузить, настроив по своему.
 
 # TO DO: добавить прерывание
 
