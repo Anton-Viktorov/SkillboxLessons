@@ -1,4 +1,4 @@
-from termcolor import cprint
+# from termcolor import cprint
 import random
 
 # TO DO: сделал и правильно использовал (по коду нигде нет 'cat_food' или 'human_food').
@@ -42,7 +42,7 @@ class Mammal:
         tmp_portion = min(self.portion, self.home.fridge[self.food_type])
         self.fullness += tmp_portion * self.food_coef
         self.home.fridge[self.food_type] -= tmp_portion
-        print(f"{self.name} eating. Fullness + {tmp_portion * self.food_coef}")
+        # print(f"{self.name} eating. Fullness + {tmp_portion * self.food_coef}")
 
     def is_alive(self):
         return self.fullness > 0
@@ -51,8 +51,8 @@ class Mammal:
 class Human(Mammal):
 
     def __init__(self, name, home, portion):
-        # TODO: если имя параметра совпадает с именем аргумента, писать "имя_параметра=" не стоит.
-        super().__init__(name=name, home=home, portion=portion, food_type=HUMAN_FOOD, food_coef=1)
+        # TO DO: если имя параметра совпадает с именем аргумента, писать "имя_параметра=" не стоит.
+        super().__init__(name, home, portion, food_type=HUMAN_FOOD, food_coef=1)
         self.happiness_level = 100
 
     def __str__(self):
@@ -68,14 +68,15 @@ class Human(Mammal):
     def pet_the_cat(self):
         self.fullness -= 10
         self.happiness_level += 5
-        print(f"{self.name} petting the cat ")
+        # print(f"{self.name} petting the cat ")
 
 
 class Husband(Human):
     """Создаем объект: муж"""
 
-    def __init__(self, name, home):
-        super().__init__(name=name, home=home, portion=30)
+    def __init__(self, name, home, salary):
+        super().__init__(name, home, portion=30)
+        self.salary = salary
 
     def __str__(self):
         return f"Муж. {super().__str__()}"
@@ -94,21 +95,21 @@ class Husband(Human):
 
     def work(self):
         self.fullness -= 10
-        self.home.money += 150
-        self.home.total_bank += 150  # Добавляем информацию о суммарном заработке за год
-        print(f"{self.name} working. Money in box + 150 ")
+        self.home.money += self.salary
+        self.home.total_bank += self.salary  # Добавляем информацию о суммарном заработке за год
+        # print(f"{self.name} working. Money in box + 150 ")
 
     def gaming(self):
         self.fullness -= 10
         self.happiness_level += 20
-        print(f"{self.name} playing WOT. Happiness + 20 ")
+        # print(f"{self.name} playing WOT. Happiness + 20 ")
 
 
 class Wife(Human):
     """Создаем объект: жена"""
 
     def __init__(self, name, home):
-        super().__init__(name=name, home=home, portion=30)
+        super().__init__(name, home, portion=30)
         self.fur_coat_collection = 0
 
     def __str__(self):
@@ -135,32 +136,32 @@ class Wife(Human):
         food_pay = min(60, self.home.money)
         self.home.fridge[HUMAN_FOOD] += food_pay
         self.home.money -= food_pay
-        print(f"{self.name} shopping. Food in fridge + {food_pay}")
+        # print(f"{self.name} shopping. Food in fridge + {food_pay}")
 
     def buy_cat_food(self):
         self.fullness -= 10
         food_pay = min(20, self.home.money)
         self.home.fridge[CAT_FOOD] += food_pay
         self.home.money -= food_pay
-        print(f"{self.name} buy cat food. Cat food + {food_pay}")
+        # print(f"{self.name} buy cat food. Cat food + {food_pay}")
 
     def buy_fur_coat(self):
         self.fullness -= 10
         self.happiness_level += 60
         self.home.money -= 350
         self.fur_coat_collection += 1
-        print(f"{self.name} buys fur coat. Happiness + 60")
+        # print(f"{self.name} buys fur coat. Happiness + 60")
 
     def clean_house(self):
         self.fullness -= 10
         self.home.dust_amt -= min(self.home.dust_amt, 100)
-        print(f"{self.name} washes house")
+        # print(f"{self.name} washes house")
 
 
 class Cat(Mammal):
 
     def __init__(self, name, home):
-        super(Cat, self).__init__(name=name, home=home, portion=10, food_coef=2, food_type=CAT_FOOD)
+        super(Cat, self).__init__(name, home, portion=10, food_coef=2, food_type=CAT_FOOD)
 
     def __str__(self):
         return f"Кот. {super().__str__()}"
@@ -174,32 +175,24 @@ class Cat(Mammal):
             self.sleep()
 
     def soil(self):
-        print(f"{self.name} tears wallpaper")
+        # print(f"{self.name} tears wallpaper")
         self.fullness -= 10
         self.home.dust_amt += 5
 
     def sleep(self):
-        print(f"{self.name} sleeping")
+        # print(f"{self.name} sleeping")
         self.fullness -= 10
 
 
 class Child(Human):
 
     def __init__(self, name, home):
-        super().__init__(name=name, home=home, portion=10)
+        super().__init__(name, home, portion=10)
 
     def __str__(self):
         return f"Ребенок. {super().__str__()}"
 
-    # TODO: этот метод трогать не надо. У ребенка есть счастье.
-    #  p.s. чисто логически, верно. Но с практической точки зрения - это доп.код, который можно было не делать.
-    #  Иначе есть опасность начать писать большие и раздутые классы. Конечно с другой стороны, такая перегрузка
-    #  гарантирует, что от несчастья он не умрет. Но с другой стороны, для управления счастьем мы создали метод
-    #  mood_drop. Можно было бы его назвать "def decrease_happiness(lvl=10)", по умолчанию убирал бы по 10 единиц.
-    def is_alive(self):
-        return self.fullness > 0
-
-    # TODO: только оно не уменьшается. Т.е. переопределения метода ниже вполне достаточно.
+    # TO DO: только оно не уменьшается. Т.е. переопределения метода ниже вполне достаточно.
     def mood_drop(self):
         pass
 
@@ -213,42 +206,160 @@ class Child(Human):
 
     def sleep(self):
         self.fullness -= 10
-        print(f"{self.name} sleeping")
+        # print(f"{self.name} sleeping")
 
     def pet_the_cat(self):
         self.fullness -= 10
-        print(f"{self.name} petting the cat ")
+        # print(f"{self.name} petting the cat ")
 
 
-home1 = House()
-serge = Husband(name='Сережа', home=home1)
-masha = Wife(name='Маша', home=home1)
-murzik = Cat(name='Мурзик', home=home1)
-kolya = Child(name='Коля', home=home1)
+class Experiment:
 
-family = [serge, masha, murzik, kolya]
+    valid_coef = 0
+    fatal_iterations = 0
+    success_iterations = 0
+    iterations = 0
 
-for day in range(365):
-    cprint('================== День {} =================='.format(day), color='red')
+    def __init__(self, numb_of_cats, salary, food_incidents, money_incidents):
+        self.numb_of_cats = numb_of_cats
+        self.salary = salary
+        self.food_incidents = food_incidents
+        self.money_incidents = money_incidents
+        # Это проба пера. Для полной крутости можно прикрутить параметры количества жен, мужей и детей.
+        # А вдруг это такая вот необычная семья) Пока сделал так.
 
-    home1.dust_append()
+    def family_generate(self):
+        self.home = House()
 
-    if all([serge.is_alive(), masha.is_alive, kolya.is_alive(), murzik.is_alive()]):
-        for x in family:
-            x.act()
-    else:
-        print(f"Один из членов семьи умер.")
-        break
+        # Family
+        self.family = []
 
-    cprint(serge, color='cyan')
-    cprint(masha, color='cyan')
-    cprint(kolya, color='cyan')
-    cprint(murzik, color='cyan')
+        # Wife and Husband
+        self.wife = Wife(name='wife', home=self.home)
+        self.husband = Husband(name='husband', home=self.home, salary=self.salary)
 
-cprint(f"{serge.name} заработал {home1.total_bank} за год", color='red')
-cprint(f"{masha.name} купила {masha.fur_coat_collection} шуб за год", color='red')
+        # Children
+        self.child =Child(name='child', home=self.home)
+
+        # Cat generator
+        self.cats = []
+        for cat in range(0, self.numb_of_cats):
+            self.cats.append(Cat(name=f"Кот {cat + 1}", home=self.home))
+
+        self.family = [self.wife, self.husband, self.child]
+        self.family += self.cats
+
+    def __lt__(self, other):
+        return self.valid_coef < other.valid_coef
+
+    def __str__(self):
+        return f"Number of cats: {self.numb_of_cats}, " \
+               f"food incidents: {self.food_incidents}, " \
+               f"money incidents: {self.money_incidents}, " \
+               f"Salary: {self.salary}. " \
+               f"Valid coefficient: {self.valid_coef}."
+
+    def food_steal(self):
+        self.home.fridge[HUMAN_FOOD] = self.home.fridge[HUMAN_FOOD] // 2
+
+    def money_steal(self):
+        self.home.money = self.home.money // 2
+
+    def family_alive(self):
+        for x in self.family:
+            if x.is_alive() != True:
+                return False
+        return True
+
+    def simulate(self, iterations):
+        self.iterations = iterations
+
+        j = 1
+        k = 1
+
+        for iteration in range(0, iterations):
+            self.family_generate()
+            for day in range(365):
+                if random.randint(1, 5) == 3 and j <= self.food_incidents:
+                    j += 1
+                    self.food_steal()
+                if random.randint(1, 5) == 3 and k <= self.money_incidents:
+                    k += 1
+                    self.money_steal()
+                if self.family_alive():
+                    for x in self.family:
+                        x.act()
+                else:
+                    self.fatal_iterations += 1
+                    break
+
+        self.success_iterations = self.iterations - self.fatal_iterations
+
+        self.valid()
+
+    def valid(self):
+        self.valid_coef = (self.success_iterations / self.iterations) * \
+                          ((self.food_incidents / 5) * (self.money_incidents / 5) *
+                           ((2 * 30) + (1 * 10) + (self.numb_of_cats * 10))) / self.salary
+
+    def get_valid(self):
+        return self.valid_coef
 
 
+results = []
+
+for numb_of_cats in range(6):
+    for food_incidents in range(6):
+        for money_incidents in range(6):
+            for salary in range(50, 401, 50):
+                experiment = Experiment(numb_of_cats, salary, food_incidents, money_incidents)
+                experiment.simulate(iterations=5)
+                if experiment.valid_coef > 0:  # Отсекаем неудачные эксперименты, где семья не выжила.
+                    results.append(experiment)
+
+results.sort(reverse=True)
+
+for result in results:
+    print(result)
+
+# experiment = Experiment(numb_of_cats=3, food_incidents=2, money_incidents=2, salary=150)
+# experiment.simulate(iterations=5)
+#
+# print(experiment)
+
+# experiment = Experiment(numb_of_cats=3, salary=100, food_incidents=3, money_incidents=4)
+# experiment.simulate(iterations=5)
+# experiment.get_valid()
+# print(experiment)
+# print(experiment.fatal_iterations, experiment.success_iterations, experiment.iterations)
+
+# home1 = House()
+# serge = Husband(name='Сережа', home=home1)
+# masha = Wife(name='Маша', home=home1)
+# murzik = Cat(name='Мурзик', home=home1)
+# kolya = Child(name='Коля', home=home1)
+#
+# family = [serge, masha, murzik, kolya]
+#
+# for day in range(365):
+#     cprint('================== День {} =================='.format(day), color='red')
+#
+#     home1.dust_append()
+#
+#     if all([serge.is_alive(), masha.is_alive, kolya.is_alive(), murzik.is_alive()]):
+#         for x in family:
+#             x.act()
+#     else:
+#         print(f"Один из членов семьи умер.")
+#         break
+#
+#     cprint(serge, color='cyan')
+#     cprint(masha, color='cyan')
+#     cprint(kolya, color='cyan')
+#     cprint(murzik, color='cyan')
+#
+# cprint(f"{serge.name} заработал {home1.total_bank} за год", color='red')
+# cprint(f"{masha.name} купила {masha.fur_coat_collection} шуб за год", color='red')
 
 # TODO: Класс Эксперимент.
 #  Сделай небольшой класс Experiment.
@@ -256,7 +367,8 @@ cprint(f"{masha.name} купила {masha.fur_coat_collection} шуб за го�
 #  число удачных повторений.
 #  Так же нужно будет перегрузить оператор сравнения - __lt__.
 #  Примечание: "__lt__" - метод вызывается при использовании оператора "<".
-#  Например:   "exp_1 < exp_2" по факту вызовет следующее "Experiment.__lt__(exp_1, exp_2)". Должно возвращать True или False.
+#  Например:   "exp_1 < exp_2" по факту вызовет следующее "Experiment.__lt__(exp_1, exp_2)". Должно возвращать
+#  True или False.
 #  .
 #  Запускаем несколько вложенных циклов (по ЗП, кол-во кошек и т.п.), перебираем разные наборы
 #  параметров. Проводим симуляции, результаты сохраняем в объекты Experiment().
@@ -271,8 +383,6 @@ cprint(f"{masha.name} купила {masha.fur_coat_collection} шуб за го�
 #  .
 #  p.s. так же можно добавить поле "число повторений". Чем больше повторений, тем более
 #  достоверны результаты эксперимента.
-
-
 
 # TODO: Коэффициент. Вес эксперимента.
 #  У класса Experiment нужно добавить ф-цию "отдай вес". Вес эксперимента, т.е. насколько он,
@@ -298,8 +408,6 @@ cprint(f"{masha.name} купила {masha.fur_coat_collection} шуб за го�
 #  1. перегрузив __lt__ может использовать sort() + срезы для получения лучших/худших;
 #  2. перегрузив __str__ можем получать инфу об эксперименте не вдаваясь в то, какие поля у эксперимента.
 
-
-
 # TODO:
 #  В итоге должен получится приблизительно такой код экспериментов.
 #     for food_incidents in range(6):
@@ -309,8 +417,13 @@ cprint(f"{masha.name} купила {masha.fur_coat_collection} шуб за го�
 #           experiment.simulate(n=5)        # 5 попыток
 #           results.append(experiment)
 
-
-
+# TO DO: этот метод трогать не надо. У ребенка есть счастье.
+#  p.s. чисто логически, верно. Но с практической точки зрения - это доп.код, который можно было не делать.
+#  Иначе есть опасность начать писать большие и раздутые классы. Конечно с другой стороны, такая перегрузка
+#  гарантирует, что от несчастья он не умрет. Но с другой стороны, для управления счастьем мы создали метод
+#  mood_drop. Можно было бы его назвать "def decrease_happiness(lvl=10)", по умолчанию убирал бы по 10 единиц.
+# def is_alive(self):
+#     return self.fullness > 0
 
 # TO DO: не не не не!!!
 #  класс Being, или если отталкиваться к биологии, то лучше Mammal - это был общий родитель для Кота и Человека.
@@ -350,7 +463,7 @@ cprint(f"{masha.name} купила {masha.fur_coat_collection} шуб за го�
 # TO DO: а как бы ты его дополнил? через тип объекта проверял бы кто вызвал eat, чтобы отнимать от нужного поля?
 # Ну да. Изначально хотел через isinstance, но ты же сказал, что это моветон. Поэтому я сделал отдельный метод.
 
-# TODO: Общий класс с Child.
+# TO DO: Общий класс с Child.
 #  Надо изменить Родительский класс, и лучше сделать его Human, таким образом, чтобы его конструктор принимал
 #  параметр "прожорливость", т.о. мы будем иметь возможность установить максимальной размер съедаемой за раз порции.
 #  Внутри же конструкторов Муж/Жена/Ребенок, когда мы будем вызывать super() класса-Родителя, у нас будет жестко,
@@ -368,7 +481,7 @@ cprint(f"{masha.name} купила {masha.fur_coat_collection} шуб за го�
 #       super().__init__(..., прожоливость=10).
 
 
-# TODO: Общий класс с Cat.
+# TO DO: Общий класс с Cat.
 #  Вообще с котом мы способны на большее.
 #  В классе Дом лучше вместо полей "кошачья еда" и "человеческая еда"
 #  ввести поле "холодильник", которое может быть словарем с 2 ключами: "кошачья еда" и ...;
@@ -495,4 +608,3 @@ cprint(f"{masha.name} купила {masha.fur_coat_collection} шуб за го�
 #  Переименовал переменную и все классы выше померли. Они работают, только с одной переменной - home.
 #  А если нужно создать 2 семьи, которые живу в разных домах?
 #  Или например семья переедет в новый дом. Допустим в версии 100500 такое появится, заказчик попросит добавить.
-
