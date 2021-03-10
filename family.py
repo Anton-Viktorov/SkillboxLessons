@@ -229,6 +229,23 @@ class Experiment:
         # А вдруг это такая вот необычная семья) Пока сделал так.
 
     def family_generate(self):
+        # TODO:
+        #  1. ниже идут различные поля. PyCharm их подсвечивает желтой линией, потому что это нарушение стиля.
+        #     Создание полей ВНЕ конструктора крайне не рекомендуется. Когда смотришь в конструктор, должно появляться
+        #     полное появление о то, что это за объект;
+        #  2. Поля ниже следует сделать локальными переменными. Метод family_generate генерирует семью, так пусть и
+        #     возвращает эту "семью") Тут важный момент: использовать поля для передачи инаформации между методами
+        #     нельзя. Почему? Потому что это приводит к раздуванию конструктора, у нас будет куча полей, каждое из
+        #     которых можно было бы заменить передачей параметра и return`ом.
+        #     .
+        #     Поля объекта - это обязательная и неотъемлемая характеристика объекта. Например, у класса Муж, есть
+        #     поле ЗП, оно его характеризует. Это важные параметр, который описывает мужа. Но вот например поля
+        #     "текущая порция" у него нет, т.к. это изменяющееся значение, которое достаточно хранить в локальной
+        #     переменной.
+        #     .
+        #     Текущий объект Эксперимент то же самое: у эксперимента есть параметры, условно 1 жена, 1 муж ...,
+        #     но непосредственно параметров Мужья, Жены... у него нет. Для эксперимента они локальные переменные
+        #     которые он создает, использует, а потом благополучно забывает о них.
         self.home = House()
 
         # Family
@@ -250,6 +267,7 @@ class Experiment:
         self.family += self.cats
 
     def __lt__(self, other):
+        # TODO: valid_coef это поле класса. Чем поле класса отличается от поля объекта?
         return self.valid_coef < other.valid_coef
 
     def __str__(self):
@@ -260,13 +278,16 @@ class Experiment:
                f"Valid coefficient: {self.valid_coef}."
 
     def food_steal(self):
+        # TODO: можно использовать //= (это не ошибка, и не ворнинг, лишь доп.инфа, позволит писать чуть короче)
         self.home.fridge[HUMAN_FOOD] = self.home.fridge[HUMAN_FOOD] // 2
 
     def money_steal(self):
+        # TODO: тоже
         self.home.money = self.home.money // 2
 
     def family_alive(self):
         for x in self.family:
+            # TODO: почему PYCharm подчеркивает строку ниже? что не так?
             if x.is_alive() != True:
                 return False
         return True
@@ -274,9 +295,20 @@ class Experiment:
     def simulate(self, iterations):
         self.iterations = iterations
 
+        # TODO: неплохо. Давай познакомимся с sample.
         j = 1
         k = 1
+        # TODO: Пример работы sample()
+        #       random.sample(list(range(100500)), 7)		# вернет список из 7 рандомных чисел из 100500 чисел
+        #  .
+        #  Соответственно, берем "self.food_incidents" и получаем столько рандомных дней из 365.
+        #  Чем больше стандартных функций ты будешь знать и использовать, тем короче твой код. Т.е. не изобретаешь
+        #  велосипед (нет, сейчас мы его не изобретали, я в общем). На собесе, когда видят, что ты знаешь sample,
+        #  zip, all, any, enumerate, filter (хотя спиское включение быстрее) или map - это играет за тебя.
+        #  Совсем новички и стажеры их не используют, они для них темный лес, и они предпочитают писать свои функции.
 
+        # TODO: переменная iteration не используется. Значит ее стоит заменить на "_", это явное указание "переменная
+        #  не важна, важен только цикл".
         for iteration in range(0, iterations):
             self.family_generate()
             for day in range(365):
@@ -286,12 +318,18 @@ class Experiment:
                 if random.randint(1, 5) == 3 and k <= self.money_incidents:
                     k += 1
                     self.money_steal()
+
+                # TODO: подумай как код ниже можно избавить от вложенности.
                 if self.family_alive():
                     for x in self.family:
                         x.act()
                 else:
                     self.fatal_iterations += 1
                     break
+                # TODO: давай запустим цикл по кортежу из всех участников. И для каждого будем вызывать: act(),
+                #  is_alive (можно еще и cprint()). При этом будет удобно ввести флаг f_success = True. А после каждого
+                #  act() выполнять "f_success &= ...".
+                #  Тогда мы сможем использовать флаг f_success чтобы прервать основной цикл, если кто-то же умрет.
 
         self.success_iterations = self.iterations - self.fatal_iterations
 
@@ -302,6 +340,7 @@ class Experiment:
                           ((self.food_incidents / 5) * (self.money_incidents / 5) *
                            ((2 * 30) + (1 * 10) + (self.numb_of_cats * 10))) / self.salary
 
+    # TODO: Поле же не скрыто. Зачем нам вызывать метод self.get_valid, если есть self.valid_coef?
     def get_valid(self):
         return self.valid_coef
 
@@ -314,13 +353,33 @@ for numb_of_cats in range(6):
             for salary in range(50, 401, 50):
                 experiment = Experiment(numb_of_cats, salary, food_incidents, money_incidents)
                 experiment.simulate(iterations=5)
+                # TODO: пусть будут все эксперименты
                 if experiment.valid_coef > 0:  # Отсекаем неудачные эксперименты, где семья не выжила.
                     results.append(experiment)
 
 results.sort(reverse=True)
 
+# TODO: выведи топ-5 лучших (срезы!)
 for result in results:
     print(result)
+
+# TODO: выведи топ-5 худших
+
+
+# TODO: Как избавиться от лишних print`ов?
+#  Мы можем закомментировать все вызовы print() и переделать много кода, чтобы не было так много выводов, а можем поступить иначе.
+#  Как можно решить эту проблему аккуратно, не перепахивая сотни строк кода?
+#       verbose = False             # глобальный флаг "печатать или нет"
+#       native_print = print        # запоминаем исходную функцию print
+#  .
+#  .
+#       def print(*args, **kwargs):                 # перегружаем функцию print() своей собственной
+#           if verbose:                             #
+#               native_print(*args, **kwargs).      # вызываем исходных print(), если глобальный флаг разрешает печать.
+#  .
+#  А там, где нужно напечатать всегда, независимо от флага verbose, используем native_print.
+#  p.s. сначал переопределяет print, потом определяем классы, которые используют native_print.
+
 
 # experiment = Experiment(numb_of_cats=3, food_incidents=2, money_incidents=2, salary=150)
 # experiment.simulate(iterations=5)
