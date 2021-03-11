@@ -5,6 +5,14 @@ import random
 CAT_FOOD = 'cat_food'
 HUMAN_FOOD = 'human_food'
 
+verbose = False
+native_print = print
+
+
+def print(*args, **kwargs):
+    if verbose:
+        native_print(*args, **kwargs)
+
 
 class House:
     """Создаем объект: дом"""
@@ -42,7 +50,7 @@ class Mammal:
         tmp_portion = min(self.portion, self.home.fridge[self.food_type])
         self.fullness += tmp_portion * self.food_coef
         self.home.fridge[self.food_type] -= tmp_portion
-        # print(f"{self.name} eating. Fullness + {tmp_portion * self.food_coef}")
+        print(f"{self.name} eating. Fullness + {tmp_portion * self.food_coef}")
 
     def is_alive(self):
         return self.fullness > 0
@@ -68,7 +76,7 @@ class Human(Mammal):
     def pet_the_cat(self):
         self.fullness -= 10
         self.happiness_level += 5
-        # print(f"{self.name} petting the cat ")
+        print(f"{self.name} petting the cat ")
 
 
 class Husband(Human):
@@ -97,12 +105,12 @@ class Husband(Human):
         self.fullness -= 10
         self.home.money += self.salary
         self.home.total_bank += self.salary  # Добавляем информацию о суммарном заработке за год
-        # print(f"{self.name} working. Money in box + 150 ")
+        print(f"{self.name} working. Money in box + 150 ")
 
     def gaming(self):
         self.fullness -= 10
         self.happiness_level += 20
-        # print(f"{self.name} playing WOT. Happiness + 20 ")
+        print(f"{self.name} playing WOT. Happiness + 20 ")
 
 
 class Wife(Human):
@@ -136,26 +144,26 @@ class Wife(Human):
         food_pay = min(60, self.home.money)
         self.home.fridge[HUMAN_FOOD] += food_pay
         self.home.money -= food_pay
-        # print(f"{self.name} shopping. Food in fridge + {food_pay}")
+        print(f"{self.name} shopping. Food in fridge + {food_pay}")
 
     def buy_cat_food(self):
         self.fullness -= 10
         food_pay = min(20, self.home.money)
         self.home.fridge[CAT_FOOD] += food_pay
         self.home.money -= food_pay
-        # print(f"{self.name} buy cat food. Cat food + {food_pay}")
+        print(f"{self.name} buy cat food. Cat food + {food_pay}")
 
     def buy_fur_coat(self):
         self.fullness -= 10
         self.happiness_level += 60
         self.home.money -= 350
         self.fur_coat_collection += 1
-        # print(f"{self.name} buys fur coat. Happiness + 60")
+        print(f"{self.name} buys fur coat. Happiness + 60")
 
     def clean_house(self):
         self.fullness -= 10
         self.home.dust_amt -= min(self.home.dust_amt, 100)
-        # print(f"{self.name} washes house")
+        print(f"{self.name} washes house")
 
 
 class Cat(Mammal):
@@ -175,12 +183,12 @@ class Cat(Mammal):
             self.sleep()
 
     def soil(self):
-        # print(f"{self.name} tears wallpaper")
+        print(f"{self.name} tears wallpaper")
         self.fullness -= 10
         self.home.dust_amt += 5
 
     def sleep(self):
-        # print(f"{self.name} sleeping")
+        print(f"{self.name} sleeping")
         self.fullness -= 10
 
 
@@ -206,30 +214,27 @@ class Child(Human):
 
     def sleep(self):
         self.fullness -= 10
-        # print(f"{self.name} sleeping")
+        print(f"{self.name} sleeping")
 
     def pet_the_cat(self):
         self.fullness -= 10
-        # print(f"{self.name} petting the cat ")
+        print(f"{self.name} petting the cat ")
 
 
 class Experiment:
-
-    valid_coef = 0
-    fatal_iterations = 0
-    success_iterations = 0
-    iterations = 0
 
     def __init__(self, numb_of_cats, salary, food_incidents, money_incidents):
         self.numb_of_cats = numb_of_cats
         self.salary = salary
         self.food_incidents = food_incidents
         self.money_incidents = money_incidents
-        # Это проба пера. Для полной крутости можно прикрутить параметры количества жен, мужей и детей.
-        # А вдруг это такая вот необычная семья) Пока сделал так.
+        self.valid_coef = 0
+        self.fatal_iterations = 0
+        self.success_iterations = 0
+        self.iterations = 0
 
     def family_generate(self):
-        # TODO:
+        # TO DO:
         #  1. ниже идут различные поля. PyCharm их подсвечивает желтой линией, потому что это нарушение стиля.
         #     Создание полей ВНЕ конструктора крайне не рекомендуется. Когда смотришь в конструктор, должно появляться
         #     полное появление о то, что это за объект;
@@ -246,29 +251,38 @@ class Experiment:
         #     Текущий объект Эксперимент то же самое: у эксперимента есть параметры, условно 1 жена, 1 муж ...,
         #     но непосредственно параметров Мужья, Жены... у него нет. Для эксперимента они локальные переменные
         #     которые он создает, использует, а потом благополучно забывает о них.
-        self.home = House()
-
-        # Family
-        self.family = []
+        home1 = House()
 
         # Wife and Husband
-        self.wife = Wife(name='wife', home=self.home)
-        self.husband = Husband(name='husband', home=self.home, salary=self.salary)
+        wife = Wife(name='wife', home=home1)
+        husband = Husband(name='husband', home=home1, salary=self.salary)
 
         # Children
-        self.child =Child(name='child', home=self.home)
+        child = Child(name='child', home=home1)
 
         # Cat generator
-        self.cats = []
+        cats = []
         for cat in range(0, self.numb_of_cats):
-            self.cats.append(Cat(name=f"Кот {cat + 1}", home=self.home))
+            cats.append(Cat(name=f"Кот {cat + 1}", home=home1))
 
-        self.family = [self.wife, self.husband, self.child]
-        self.family += self.cats
+        family = [wife, husband, child]
+        family += cats
+
+        return family, home1
 
     def __lt__(self, other):
-        # TODO: valid_coef это поле класса. Чем поле класса отличается от поля объекта?
+        # TO DO: valid_coef это поле класса. Чем поле класса отличается от поля объекта?
+        # Вроде отвечал на такой вопрос.
+        # Поле класса относится к классу, а не к конкретному объекту. Поэтому к нему можно обратиться
+        # без инициализации объекта. При этом атрибуты в поле класса, являются атрибутами объекта.
+        # К ним можно обращаться, менять их(старые связи теряются при этом)
+        # А если изменить атрибут в поле класса, то он изменяиться для всех объектов.
+
+        # Перенес valid_coef в поле объекта
         return self.valid_coef < other.valid_coef
+
+    def __repr__(self):
+        return self.__str__()
 
     def __str__(self):
         return f"Number of cats: {self.numb_of_cats}, " \
@@ -277,28 +291,19 @@ class Experiment:
                f"Salary: {self.salary}. " \
                f"Valid coefficient: {self.valid_coef}."
 
-    def food_steal(self):
-        # TODO: можно использовать //= (это не ошибка, и не ворнинг, лишь доп.инфа, позволит писать чуть короче)
-        self.home.fridge[HUMAN_FOOD] = self.home.fridge[HUMAN_FOOD] // 2
-
-    def money_steal(self):
-        # TODO: тоже
-        self.home.money = self.home.money // 2
-
-    def family_alive(self):
-        for x in self.family:
-            # TODO: почему PYCharm подчеркивает строку ниже? что не так?
-            if x.is_alive() != True:
-                return False
-        return True
+    # def family_alive(self):
+    #     for x in family:
+    #         # TO DO: почему PYCharm подчеркивает строку ниже? что не так?
+    #         # Правильно писать 'is not'. У меня почему-то первый раз не сработало, может ошибку сделал.
+    #         if x.is_alive() is not True:
+    #             return False
+    #     return True
 
     def simulate(self, iterations):
         self.iterations = iterations
 
-        # TODO: неплохо. Давай познакомимся с sample.
-        j = 1
-        k = 1
-        # TODO: Пример работы sample()
+        # TO DO: неплохо. Давай познакомимся с sample.
+        # TO DO: Пример работы sample()
         #       random.sample(list(range(100500)), 7)		# вернет список из 7 рандомных чисел из 100500 чисел
         #  .
         #  Соответственно, берем "self.food_incidents" и получаем столько рандомных дней из 365.
@@ -307,26 +312,32 @@ class Experiment:
         #  zip, all, any, enumerate, filter (хотя спиское включение быстрее) или map - это играет за тебя.
         #  Совсем новички и стажеры их не используют, они для них темный лес, и они предпочитают писать свои функции.
 
-        # TODO: переменная iteration не используется. Значит ее стоит заменить на "_", это явное указание "переменная
+        # TO DO: переменная iteration не используется. Значит ее стоит заменить на "_", это явное указание "переменная
         #  не важна, важен только цикл".
-        for iteration in range(0, iterations):
-            self.family_generate()
-            for day in range(365):
-                if random.randint(1, 5) == 3 and j <= self.food_incidents:
-                    j += 1
-                    self.food_steal()
-                if random.randint(1, 5) == 3 and k <= self.money_incidents:
-                    k += 1
-                    self.money_steal()
+        for _ in range(0, iterations):
+            family, home = self.family_generate()
 
-                # TODO: подумай как код ниже можно избавить от вложенности.
-                if self.family_alive():
-                    for x in self.family:
-                        x.act()
-                else:
+            f_inc = random.sample(list(range(365)), self.food_incidents)
+            m_inc = random.sample(list(range(365)), self.money_incidents)
+
+            f_success = True
+            for day in range(365):
+                if day in f_inc:
+                    home.fridge[HUMAN_FOOD] //= 2
+
+                if day in m_inc:
+                    home.money //= 2
+
+                # TO DO: подумай как код ниже можно избавить от вложенности.
+                for x in family:
+                    x.act()
+                    f_success &= bool(x.is_alive)
+
+                if f_success is not True:
                     self.fatal_iterations += 1
                     break
-                # TODO: давай запустим цикл по кортежу из всех участников. И для каждого будем вызывать: act(),
+
+                # TO DO: давай запустим цикл по кортежу из всех участников. И для каждого будем вызывать: act(),
                 #  is_alive (можно еще и cprint()). При этом будет удобно ввести флаг f_success = True. А после каждого
                 #  act() выполнять "f_success &= ...".
                 #  Тогда мы сможем использовать флаг f_success чтобы прервать основной цикл, если кто-то же умрет.
@@ -340,11 +351,6 @@ class Experiment:
                           ((self.food_incidents / 5) * (self.money_incidents / 5) *
                            ((2 * 30) + (1 * 10) + (self.numb_of_cats * 10))) / self.salary
 
-    # TODO: Поле же не скрыто. Зачем нам вызывать метод self.get_valid, если есть self.valid_coef?
-    def get_valid(self):
-        return self.valid_coef
-
-
 results = []
 
 for numb_of_cats in range(6):
@@ -352,22 +358,28 @@ for numb_of_cats in range(6):
         for money_incidents in range(6):
             for salary in range(50, 401, 50):
                 experiment = Experiment(numb_of_cats, salary, food_incidents, money_incidents)
+                # PyCharm меня предупреждает насчет того, что имена локальных переменных совпадают с глобальными.
+                # Это я про numb_of_cats, salary, food_incidents, money_incidents. Понимаю, что в более крупных
+                # программах это может вызвать проблемы, но тут решил пока оставить так.
                 experiment.simulate(iterations=5)
-                # TODO: пусть будут все эксперименты
-                if experiment.valid_coef > 0:  # Отсекаем неудачные эксперименты, где семья не выжила.
-                    results.append(experiment)
+                # TO DO: пусть будут все эксперименты
+                results.append(experiment)
 
 results.sort(reverse=True)
 
-# TODO: выведи топ-5 лучших (срезы!)
-for result in results:
-    print(result)
+# TO DO: выведи топ-5 лучших (срезы!)
+native_print('Топ 5 лучших экспериментов')
+native_print(results[0:5])
+native_print('\n')
+native_print('Топ 5 худших экспериментов')
+native_print(results[:-5:-1])
 
-# TODO: выведи топ-5 худших
+# TO DO: выведи топ-5 худших
 
 
-# TODO: Как избавиться от лишних print`ов?
-#  Мы можем закомментировать все вызовы print() и переделать много кода, чтобы не было так много выводов, а можем поступить иначе.
+# TO DO: Как избавиться от лишних print`ов?
+#  Мы можем закомментировать все вызовы print() и переделать много кода, чтобы не было так много выводов,
+#  а можем поступить иначе.
 #  Как можно решить эту проблему аккуратно, не перепахивая сотни строк кода?
 #       verbose = False             # глобальный флаг "печатать или нет"
 #       native_print = print        # запоминаем исходную функцию print
@@ -380,6 +392,9 @@ for result in results:
 #  А там, где нужно напечатать всегда, независимо от флага verbose, используем native_print.
 #  p.s. сначал переопределяет print, потом определяем классы, которые используют native_print.
 
+# # TO DO: Поле же не скрыто. Зачем нам вызывать метод self.get_valid, если есть self.valid_coef?
+# def get_valid(self):
+#     return self.valid_coef
 
 # experiment = Experiment(numb_of_cats=3, food_incidents=2, money_incidents=2, salary=150)
 # experiment.simulate(iterations=5)
