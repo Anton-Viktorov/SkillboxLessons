@@ -351,15 +351,18 @@ class Experiment:
             m_inc = random.sample(list(range(365)), self.money_incidents)
 
             f_success = True
-            # TODO: почему симуляци не прерывается?
+            # TO DO: почему симуляци не прерывается?
             # Потому что на этапе входа в симуляцию нет проверки живы подопытные или нет.
             # + я потерял 'not' в проверке f_success
-            # TODO: нет.
+            # TO DO: нет.
             #  Было "if f_success is not True", стало "if not f_success" - это равнозначные записи, хотя вторая
             #  правильнее, более питоновская.
             #  .
             #  проблема не решена. Все равно не прерывается.
-            family[0].fullness = -1000500
+            # FIX. Кажется получилось. Прошел цикл через дебагер, bool все время возвращал истину
+            # Видимо потому что объект существует и он истиннен. Странно, я тестил в отдельной проге у меня работало
+            # Я подумал, что избежал этого.
+            # family[0].fullness = -1000500
 
             for day in range(365):
                 if day in f_inc:
@@ -371,7 +374,8 @@ class Experiment:
                 # TO DO: подумай как код ниже можно избавить от вложенности.
                 for x in family:
                     x.act()
-                    f_success &= bool(x.is_alive)
+
+                f_success &= all(map(lambda x: x.is_alive(), family))
 
                 # TO DO: сначала найди TOD0 насчет family_alive, а потом сюда)
                 if not f_success:
@@ -391,6 +395,7 @@ class Experiment:
         self.valid_coef = (self.success_iterations / self.iterations) * \
                           ((self.food_incidents / 5) * (self.money_incidents / 5) *
                            ((2 * 30) + (1 * 10) + (self.numb_of_cats * 10))) / self.salary
+
 
 results = []
 
