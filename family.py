@@ -251,35 +251,35 @@ class Experiment:
         #     Текущий объект Эксперимент то же самое: у эксперимента есть параметры, условно 1 жена, 1 муж ...,
         #     но непосредственно параметров Мужья, Жены... у него нет. Для эксперимента они локальные переменные
         #     которые он создает, использует, а потом благополучно забывает о них.
-        home1 = House()
+        home = House()
 
         # Wife and Husband
-        # TODO: предполагаю, что home1 сделан, чтобы имя не совпадало с именем параметра.
+        # TO DO: предполагаю, что home1 сделан, чтобы имя не совпадало с именем параметра.
         #  Не стоит ради такое мелочи портить имя переменной. Пусть "name='wife'" заставляет нас добавить имя параметра,
         #  чтобы было понятно, что это за аргумент, и поэтому мы вынуждены для остальных тоже добавлять. Ну приходится
         #  добавлять. Ничего не попишешь. Но home1, это как my_home - не информативно. Точнее 1 и приставка my_
         #  не информативны, по крайне мере в данном контексте. Тонкая материя, уровня легкий ворнинг, но надеюсь
         #  суть смог уловить.
-        wife = Wife(name='wife', home=home1)
-        husband = Husband(name='husband', home=home1, salary=self.salary)
+        wife = Wife(name='wife', home=home)
+        husband = Husband(name='husband', home=home, salary=self.salary)
 
         # Children
-        child = Child(name='child', home=home1)
+        child = Child(name='child', home=home)
 
         # Cat generator
         cats = []
         for cat in range(0, self.numb_of_cats):
-            cats.append(Cat(name=f"Кот {cat + 1}", home=home1))
+            cats.append(Cat(name=f"Кот {cat + 1}", home=home))
 
         family = [wife, husband, child]
         family += cats
 
-        return family, home1
+        return family, home
 
     def __lt__(self, other):
         return self.valid_coef < other.valid_coef
 
-    # TODO: чем отличается __repr__ от __str__?
+    # TO DO: чем отличается __repr__ от __str__?
     #  Зачем их 2? ведь похожи!
     #  __repr__ - для вывода информации для программиста. __str__ - это красивый вывод, с сообщением и прочими рюшками,
     #  а __repr__ - это отладочный вывод, который скажет программисту что это за объект и где он лежит.
@@ -289,9 +289,9 @@ class Experiment:
     #  .
     #  __repr__ - внутреннее пользование
     #  __str__ - внешнее, для пользователей.
-    def __repr__(self):
-        return self.__str__()
-    # TODO: вот пример:
+    # def __repr__(self):
+    #     return self.__str__()
+    # TO DO: вот пример:
     # >>> class A:                  # пустой класс
     # ...    pass
     # ...
@@ -314,18 +314,20 @@ class Experiment:
 
     # def family_alive(self):
     #     for x in family:
-    #         # TODO: почему PYCharm подчеркивает строку ниже? что не так?
+    #         # TO DO: почему PYCharm подчеркивает строку ниже? что не так?
     #         # Правильно писать 'is not'. У меня почему-то первый раз не сработало, может ошибку сделал.
-    #         if x.is_alive() is not True:
+    #         if x.is_alive():
     #             return False
     #     return True
 
-    # TODO: да. НО x.is_alive() возвращает True или False. Не надо его с чем-то сранивать.
+    # TO DO: да. НО x.is_alive() возвращает True или False. Не надо его с чем-то сранивать.
     #  if x.is_alive():
     #     объект жив!
     #  .
     #  if not x.is_alive():     # True|False не принято сравнивать с True|False.
     #     объект мерт :(
+
+    # Все понял, принял.
 
     def simulate(self, iterations):
         self.iterations = iterations
@@ -348,10 +350,12 @@ class Experiment:
             f_inc = random.sample(list(range(365)), self.food_incidents)
             m_inc = random.sample(list(range(365)), self.money_incidents)
 
-            # TODO: почему симуляци не прерывается?
-            family[0].fullness = -1000500
-
             f_success = True
+            # TO DO: почему симуляци не прерывается?
+            # Потому что на этапе входа в симуляцию нет проверки живы подопытные или нет.
+            # + я потерял 'not' в проверке f_success
+            # family[0].fullness = -1000500
+
             for day in range(365):
                 if day in f_inc:
                     home.fridge[HUMAN_FOOD] //= 2
@@ -364,8 +368,8 @@ class Experiment:
                     x.act()
                     f_success &= bool(x.is_alive)
 
-                # TODO: сначала найди TOD0 насчет family_alive, а потом сюда)
-                if f_success is not True:
+                # TO DO: сначала найди TOD0 насчет family_alive, а потом сюда)
+                if not f_success:
                     self.fatal_iterations += 1
                     break
 
@@ -399,12 +403,17 @@ for numb_of_cats in range(6):
 
 results.sort(reverse=True)
 
+native_print('Топ 5 лучших экспериментов \n')
+for i in range(5):
+    native_print(f"{results[i]} \n")
+native_print('Топ 5 худших экспериментов \n')
+for i in range(-1, -6, -1):
+    native_print(f"{results[i]} \n")
+
 # TO DO: выведи топ-5 лучших (срезы!)
-native_print('Топ 5 лучших экспериментов')
-native_print(results[0:5])
-native_print('\n')
-native_print('Топ 5 худших экспериментов')
-native_print(results[:-5:-1])
+# native_print(results[0:5])
+# native_print('\n')
+# native_print(results[:-5:-1])
 
 # TO DO: выведи топ-5 худших
 
