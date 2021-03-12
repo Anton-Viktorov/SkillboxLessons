@@ -351,10 +351,15 @@ class Experiment:
             m_inc = random.sample(list(range(365)), self.money_incidents)
 
             f_success = True
-            # TO DO: почему симуляци не прерывается?
+            # TODO: почему симуляци не прерывается?
             # Потому что на этапе входа в симуляцию нет проверки живы подопытные или нет.
             # + я потерял 'not' в проверке f_success
-            # family[0].fullness = -1000500
+            # TODO: нет.
+            #  Было "if f_success is not True", стало "if not f_success" - это равнозначные записи, хотя вторая
+            #  правильнее, более питоновская.
+            #  .
+            #  проблема не решена. Все равно не прерывается.
+            family[0].fullness = -1000500
 
             for day in range(365):
                 if day in f_inc:
