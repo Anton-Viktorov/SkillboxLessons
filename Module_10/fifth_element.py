@@ -15,3 +15,5 @@ except IndexError as e:
     print(f"Входной список слишком короткий. Нет элемента с индексом 4")
 except Exception as e:
     print(f"Непредвиденная ошибка. Информация: {e}")
+
+# TODO: ok
