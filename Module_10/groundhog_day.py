@@ -8,31 +8,65 @@ import random
 # что что-то не сходится. А потом дошло, что исключение может и не выпасть. И дело пошло)
 
 class IamGodError(Exception):
-    pass
+
+    def __str__(self):
+        return f'Так трудно быть богом'
 
 
 class DrunkError(Exception):
-    pass
+
+    def __str__(self):
+        return f'Я не минздрав, но предупреждаю, что пить надо меньше'
 
 
 class CarCrashError(Exception):
-    pass
+
+    def __str__(self):
+        return f'Страховая от тебя шифруется'
 
 
 class GluttonyError(Exception):
-    pass
+
+    def __str__(self):
+        return f'На холодильник пора вешать замок'
 
 
 class DepressionError(Exception):
-    pass
+
+    def __str__(self):
+        return f'Пора смотреть мелодраммы'
 
 
 class SuicideError(Exception):
-    pass
+
+    def __str__(self):
+        return f'RIP'
 
 
-# Список из 13 возможных событий
-# TODO:
+events = (IamGodError, DrunkError, CarCrashError, GluttonyError, DepressionError, SuicideError,)
+
+
+def one_day():
+    global events
+    p = random.randint(0, 12)
+    try:
+        raise events[p]
+    except IndexError:
+        return random.randint(1, 7)
+
+
+ENLIGHTENMENT_CARMA_LEVEL = 777
+current_carma_lvl = 0
+
+while current_carma_lvl < ENLIGHTENMENT_CARMA_LEVEL:
+    try:
+        current_carma_lvl += one_day()
+        print(current_carma_lvl)
+    except events as e:
+        print(e)
+
+# Список возможных исключений
+# TO DO:
 #  1. пусть будут только исключени;
 #  2. лучше кортеж использовать, если список не собираемся модицифировать.
 #       Кортежи полезны в 2х случаях:
@@ -41,46 +75,14 @@ class SuicideError(Exception):
 #               [('матан', 'Петров И.И.'б, 160),            # предмет, ФИО препода, часы лекций
 #                ('начертался', 'Никифоров И.А.'б, 40),
 #                ('3d-моделирование', 'Петров П.С.'б, 80)]
-events = [IamGodError, DrunkError, CarCrashError, GluttonyError, DepressionError, SuicideError,
-          '', '', '', '', '', '', '']
 
-# TODO: нет. не имеет значения, т.к. choice берет рандомный вариант.
-# Перемешал
-random.shuffle(events)
+# TO DO: это константа?
 
+# TO DO: перегрузи __str__ у классов исключений. А здесь сделай общий для всех обработчик.
+#  Перегрузил str? можешь вывести исключение принтом и получить нужное сообщение.
 
-def one_day():
-    global events
-    event = random.choice(events)
-    # TODO: да, идею понимаю. Но наполнять events пустыми строка - не лучший вариант, потому что, что если вероятность
-    #  исключения будет 6 к 100. Не будет же мы 94 пустых строки вписывать?
-    #  Потому придумай альтернтивный вариант.
-    if event:
-        raise event
-    else:
-        return random.randint(1, 7)
+# TO DO: да, идею понимаю. Но наполнять events пустыми строка - не лучший вариант, потому что, что если вероятность
+#  исключения будет 6 к 100. Не будет же мы 94 пустых строки вписывать?
+#  Потому придумай альтернтивный вариант.
 
-
-ENLIGHTENMENT_CARMA_LEVEL = 777
-
-# TODO: это константа?
-CURRENT_CARMA_LVL = 0
-
-while CURRENT_CARMA_LVL < ENLIGHTENMENT_CARMA_LEVEL:
-    try:
-        CURRENT_CARMA_LVL += one_day()
-        print(CURRENT_CARMA_LVL)
-    # TODO: перегрузи __str__ у классов исключений. А здесь сделай общий для всех обработчик.
-    #  Перегрузил str? можешь вывести исключение принтом и получить нужное сообщение.
-    except IamGodError:
-        print('Так трудно быть богом')
-    except DrunkError:
-        print('Я не минздрав, но предупреждаю, что пить надо меньше')
-    except CarCrashError:
-        print('Страховая от тебя шифруется')
-    except GluttonyError:
-        print('На холодильник пора вешать замок')
-    except DepressionError:
-        print('Пора смотреть мелодраммы')
-    except SuicideError:
-        print('RIP')
+# TO DO: нет. не имеет значения, т.к. choice берет рандомный вариант.
