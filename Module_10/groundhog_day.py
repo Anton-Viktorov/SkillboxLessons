@@ -48,12 +48,17 @@ events = (IamGodError, DrunkError, CarCrashError, GluttonyError, DepressionError
 
 def one_day():
 
-    one_more_day = random.choices(['exception', 'regular day'], weights=[0.08, 0.92])
-
-    if 'exception' == one_more_day:
+    if random.randint(1, 13) == 1:
         raise random.choice(events)
     else:
         return random.randint(1, 7)
+
+    # one_more_day = random.choices(['exception', 'regular day'], weights=[0.08, 0.92])
+    #
+    # if 'exception' == one_more_day:
+    #     raise random.choice(events)
+    # else:
+    #     return random.randint(1, 7)
 
 
 ENLIGHTENMENT_CARMA_LEVEL = 777
