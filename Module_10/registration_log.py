@@ -40,39 +40,15 @@ class Logger:
 
         self.logger.addHandler(logger_handler)
 
-    # TODO: объемненько выходит.
-    #  Как насчет здесь сделать метод add_entry, который в зависимости от уровня будет добавлять сообщение,
-    #  в нужное место.
-    #  .
-    #  Тогда можно будет создать сколько угодно логгеров: и бэд, и гуд, и не очень гуд. Какие угодно.
-
-
-#  Изначально сделал два метода для класса родителя. Но подумал, что лучше сделать классы-наследники с одинаковым
-#  названием метода для удобства.
-
-
-class GoodLogger(Logger):
-    """Логгер для записи корректных данных"""
-
-    def __init__(self):
-        super().__init__(lvl=logging.INFO, f_name='registrations_good.log', name='good_logger')
-
     def add_entry(self, msg):
-        self.logger.info(msg)
+        if self.lvl == logging.INFO:
+            self.logger.info(msg)
+        elif self.lvl == logging.ERROR:
+            self.logger.error(msg)
 
 
-class BadLogger(Logger):
-    """Логгер для записи ошибок"""
-
-    def __init__(self):
-        super().__init__(lvl=logging.ERROR, f_name='registrations_bad.log', name='bad_logger')
-
-    def add_entry(self, msg):
-        self.logger.error(msg)
-
-
-good_logger = GoodLogger()
-bad_logger = BadLogger()
+good_logger = Logger(lvl=logging.INFO, f_name='registrations_good.log', name='good_logger')
+bad_logger = Logger(lvl=logging.ERROR, f_name='registrations_bad.log', name='bad_logger')
 
 
 filename = 'registrations.txt'
@@ -83,14 +59,46 @@ with open(filename, 'r', encoding='utf-8') as f:
             name_valid(name)
             email_valid(email)
             age_valid(age)
-        # TODO: добавь поддержку исключения ZeroDivision и еще какого-нибудь. (просто так, знаю, что они не выпадут)
+        # TO DO: добавь поддержку исключения ZeroDivision и еще какого-нибудь. (просто так, знаю, что они не выпадут)
         except ValueError as e:
             bad_logger.add_entry(e)
+        except ZeroDivisionError:
+            print('Нельзя делить на ноль')
+        except NameError as e:
+            print(f'Переменная не найдена. Информация: {e}')
         else:
             good_logger.add_entry(line)
         finally:
             print(f'Обработал строку: {line}')
 
+
+# class GoodLogger(Logger):
+#     """Логгер для записи корректных данных"""
+#
+#     def __init__(self):
+#         super().__init__(lvl=logging.INFO, f_name='registrations_good.log', name='good_logger')
+#
+#     def add_entry(self, msg):
+#         self.logger.info(msg)
+#
+#
+# class BadLogger(Logger):
+#     """Логгер для записи ошибок"""
+#
+#     def __init__(self):
+#         super().__init__(lvl=logging.ERROR, f_name='registrations_bad.log', name='bad_logger')
+#
+#     def add_entry(self, msg):
+#         self.logger.error(msg)
+
+# TO DO: объемненько выходит.
+#  Как насчет здесь сделать метод add_entry, который в зависимости от уровня будет добавлять сообщение,
+#  в нужное место.
+#  .
+#  Тогда можно будет создать сколько угодно логгеров: и бэд, и гуд, и не очень гуд. Какие угодно.
+
+#  Изначально сделал два метода для класса родителя. Но подумал, что лучше сделать классы-наследники с одинаковым
+#  названием метода для удобства.
 
 # TO DO: например, logging.INFO - уровень ошибки
 
