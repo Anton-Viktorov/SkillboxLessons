@@ -50,7 +50,6 @@ class Logger:
 good_logger = Logger(lvl=logging.INFO, f_name='registrations_good.log', name='good_logger')
 bad_logger = Logger(lvl=logging.ERROR, f_name='registrations_bad.log', name='bad_logger')
 
-exc = (ValueError, ZeroDivisionError, NameError,)
 
 filename = 'registrations.txt'
 with open(filename, 'r', encoding='utf-8') as f:
@@ -61,8 +60,8 @@ with open(filename, 'r', encoding='utf-8') as f:
             email_valid(email)
             age_valid(age)
         # Закинуть исключения в кортеж?
-        # TODO: да, но лучше его прям тут вписать, не создавая переменную exc
-        except exc as e:
+        # TO DO: да, но лучше его прям тут вписать, не создавая переменную exc
+        except (ValueError, ZeroDivisionError, NameError,) as e:
             bad_logger.add_entry(e)
         else:
             good_logger.add_entry(line)
