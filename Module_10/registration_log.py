@@ -59,13 +59,14 @@ with open(filename, 'r', encoding='utf-8') as f:
             name_valid(name)
             email_valid(email)
             age_valid(age)
-        # TO DO: добавь поддержку исключения ZeroDivision и еще какого-нибудь. (просто так, знаю, что они не выпадут)
+        # TODO: добавь поддержку исключения ZeroDivision и еще какого-нибудь. (просто так, знаю, что они не выпадут)
+        #  как упростить запись ниже?
         except ValueError as e:
             bad_logger.add_entry(e)
         except ZeroDivisionError:
-            print('Нельзя делить на ноль')
+            bad_logger.add_entry(e)
         except NameError as e:
-            print(f'Переменная не найдена. Информация: {e}')
+            bad_logger.add_entry(e)
         else:
             good_logger.add_entry(line)
         finally:
