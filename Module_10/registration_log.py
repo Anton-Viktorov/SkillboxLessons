@@ -50,6 +50,7 @@ class Logger:
 good_logger = Logger(lvl=logging.INFO, f_name='registrations_good.log', name='good_logger')
 bad_logger = Logger(lvl=logging.ERROR, f_name='registrations_bad.log', name='bad_logger')
 
+exc = (ValueError, ZeroDivisionError, NameError,)
 
 filename = 'registrations.txt'
 with open(filename, 'r', encoding='utf-8') as f:
@@ -59,13 +60,11 @@ with open(filename, 'r', encoding='utf-8') as f:
             name_valid(name)
             email_valid(email)
             age_valid(age)
-        # TODO: добавь поддержку исключения ZeroDivision и еще какого-нибудь. (просто так, знаю, что они не выпадут)
+        # TO DO: добавь поддержку исключения ZeroDivision и еще какого-нибудь. (просто так, знаю, что они не выпадут)
         #  как упростить запись ниже?
-        except ValueError as e:
-            bad_logger.add_entry(e)
-        except ZeroDivisionError:
-            bad_logger.add_entry(e)
-        except NameError as e:
+
+        # Закинуть исключения в кортеж?
+        except exc as e:
             bad_logger.add_entry(e)
         else:
             good_logger.add_entry(line)
