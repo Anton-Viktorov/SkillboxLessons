@@ -60,10 +60,8 @@ with open(filename, 'r', encoding='utf-8') as f:
             name_valid(name)
             email_valid(email)
             age_valid(age)
-        # TO DO: добавь поддержку исключения ZeroDivision и еще какого-нибудь. (просто так, знаю, что они не выпадут)
-        #  как упростить запись ниже?
-
         # Закинуть исключения в кортеж?
+        # TODO: да, но лучше его прям тут вписать, не создавая переменную exc
         except exc as e:
             bad_logger.add_entry(e)
         else:
