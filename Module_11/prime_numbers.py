@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import math
 # Есть функция генерации списка простых чисел
 
 # def get_prime_numbers(n):
@@ -23,37 +24,38 @@ class PrimeNumbers:
 
     def __init__(self, n):
         self.n = n
-        # TODO: не. Мы сейчас храним все числа.
+        # TO DO: не. Мы сейчас храним все числа.
         #  Да, это выгодно: посчитал 1 раз и дальше используешь.
         #  Но итераторы решают другуюп проблему, должны решать: если чисел 100500 штук. И они просто не влезают
         #  в память компа. А еще пользователь может взять только первые 10 чисел и успокоиться, а мы все N чисел
         #  посчитали.
         #  .
         #  Сделай так, чтобы числа не хранились.
-        self.prime_numbers = []
-        self.iter = None
+        self.iter = 1
 
-        self.generate_prime_numbers()
-
-    def generate_prime_numbers(self):
-        for num in range(2, self.n+1):
-            for prime in self.prime_numbers:
-                if num % prime == 0:
-                    break
-            else:
-                self.prime_numbers.append(num)
+    def check_iter(self):
+        for x in range(2, int(self.iter ** 0.5) + 1):
+            if self.iter % x == 0:
+                return False
+        return True
 
     def __iter__(self):
-        self.iter = iter(self.prime_numbers)
+        self.iter = 1
         return self
 
     def __next__(self):
-        return next(self.iter)
+        self.iter += 1
+        if self.iter >= self.n:
+            raise StopIteration
+        elif self.check_iter():
+            return self.iter
+        else:
+            return self.__next__()
 
 
-prime_number_iterator = PrimeNumbers(n=100)
+prime_number_iterator = PrimeNumbers(n=1000)
 for number in prime_number_iterator:
-    print(number, end=', ')
+    print(number)
 
 
 # TODO после подтверждения части 1 преподователем, можно делать
