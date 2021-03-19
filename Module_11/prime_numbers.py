@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import math
 # Есть функция генерации списка простых чисел
 
 # def get_prime_numbers(n):
@@ -33,12 +32,13 @@ class PrimeNumbers:
         #  Сделай так, чтобы числа не хранились.
         self.iter = 1
 
-    # TODO: функция ответчае "да" или "нет".
+    # TO DO: функция ответчае "да" или "нет".
     #  На какой вопрос?
     #  Как лучше тогда назвать метод?  (для примера повспоминай какие встроенные функции встречались, которые тоже
     #                                   отвечаи "да" или "нет")
-    def check_iter(self):
-        # TODO: раз модуль math импортируем, используй ceil
+    def is_iter(self):
+        # TO DO: раз модуль math импортируем, используй ceil
+        # Я передумал) Забыл удалить.
         for x in range(2, int(self.iter ** 0.5) + 1):
             if self.iter % x == 0:
                 return False
@@ -52,15 +52,15 @@ class PrimeNumbers:
         self.iter += 1
         if self.iter >= self.n:
             raise StopIteration
-        elif self.check_iter():
+        elif self.is_iter():
             return self.iter
         else:
-            # TODO: лучше next(self). метод __ххххх__ не принято так вызывать.
+            # TO DO: лучше next(self). метод __ххххх__ не принято так вызывать.
             #  Единственное исключение: super().__init__.
-            return self.__next__()
+            return next(self)
 
 
-# TODO: опять заменил, т.к. так легче увидеть не пропущены ли числа.
+# TO DO: опять заменил, т.к. так легче увидеть не пропущены ли числа.
 prime_number_iterator = PrimeNumbers(n=100)
 for number in prime_number_iterator:
     print(number, end=', ')
