@@ -1,0 +1,4 @@
+function: check_line - ERROR - Age not in 10..99 range
+function: check_line - ERROR - it's not a email
+function: check_line - ERROR - not enough values to unpack (expected 3, got 2)
+function: perky - ERROR - division by zero
