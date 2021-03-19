@@ -23,6 +23,13 @@ class PrimeNumbers:
 
     def __init__(self, n):
         self.n = n
+        # TODO: не. Мы сейчас храним все числа.
+        #  Да, это выгодно: посчитал 1 раз и дальше используешь.
+        #  Но итераторы решают другуюп проблему, должны решать: если чисел 100500 штук. И они просто не влезают
+        #  в память компа. А еще пользователь может взять только первые 10 чисел и успокоиться, а мы все N чисел
+        #  посчитали.
+        #  .
+        #  Сделай так, чтобы числа не хранились.
         self.prime_numbers = []
         self.iter = None
 
@@ -44,9 +51,9 @@ class PrimeNumbers:
         return next(self.iter)
 
 
-prime_number_iterator = PrimeNumbers(n=10000)
+prime_number_iterator = PrimeNumbers(n=100)
 for number in prime_number_iterator:
-    print(number)
+    print(number, end=', ')
 
 
 # TODO после подтверждения части 1 преподователем, можно делать
