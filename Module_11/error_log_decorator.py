@@ -16,10 +16,13 @@ def log_errors(f_name):
 
         def inner(*args, **kwargs):
             try:
+                # TODO: сразу можно return, без result
                 result = fun(*args, **kwargs)
             except Exception as e:
                 logger.error(e)
-                raise e
+                # TODO: кое-чего стер. Оставил только raise. В таком случае будет возбуждено исключение, которое
+                #  было последним.
+                raise
             return result
 
         return inner

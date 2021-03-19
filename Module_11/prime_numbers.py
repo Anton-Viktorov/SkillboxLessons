@@ -33,7 +33,12 @@ class PrimeNumbers:
         #  Сделай так, чтобы числа не хранились.
         self.iter = 1
 
+    # TODO: функция ответчае "да" или "нет".
+    #  На какой вопрос?
+    #  Как лучше тогда назвать метод?  (для примера повспоминай какие встроенные функции встречались, которые тоже
+    #                                   отвечаи "да" или "нет")
     def check_iter(self):
+        # TODO: раз модуль math импортируем, используй ceil
         for x in range(2, int(self.iter ** 0.5) + 1):
             if self.iter % x == 0:
                 return False
@@ -50,12 +55,15 @@ class PrimeNumbers:
         elif self.check_iter():
             return self.iter
         else:
+            # TODO: лучше next(self). метод __ххххх__ не принято так вызывать.
+            #  Единственное исключение: super().__init__.
             return self.__next__()
 
 
-prime_number_iterator = PrimeNumbers(n=1000)
+# TODO: опять заменил, т.к. так легче увидеть не пропущены ли числа.
+prime_number_iterator = PrimeNumbers(n=100)
 for number in prime_number_iterator:
-    print(number)
+    print(number, end=', ')
 
 
 # TODO после подтверждения части 1 преподователем, можно делать
