@@ -61,27 +61,15 @@ class PrimeNumbers:
 
 
 # TO DO: опять заменил, т.к. так легче увидеть не пропущены ли числа.
-prime_number_iterator = PrimeNumbers(n=100)
-for number in prime_number_iterator:
-    print(number, end=', ')
+# prime_number_iterator = PrimeNumbers(n=100)
+# for number in prime_number_iterator:
+#     print(number, end=', ')
 
+# Сделал обе сразу
 
 # Часть 2
 # Теперь нужно создать генератор, который выдает последовательность простых чисел до n
 # Распечатать все простые числа до 10000 в столбик
-def primes_number_generator(n):
-    for prime in range(2, n+1):
-        for x in range(2, int(prime ** 0.5) + 1):
-            if prime % x == 0:
-                break
-        else:
-            yield prime
-
-
-primes_100 = primes_number_generator(100)
-for prime in primes_100:
-    print(prime, end=', ')
-
 
 # Часть 3
 # Написать несколько функций-фильтров, которые выдает True, если число:
@@ -98,3 +86,46 @@ for prime in primes_100:
 # простых счастливых палиндромных чисел и так далее. Придумать не менее 2х способов.
 #
 # Подсказка: возможно, нужно будет добавить параметр в итератор/генератор.
+
+
+def primes_number_generator(n, number_type):
+    for prime in range(2, n+1):
+        for x in range(2, int(prime ** 0.5) + 1):
+            if prime % x == 0:
+                break
+        else:
+            if number_type(prime):
+                yield prime
+
+
+def is_happy(number):
+    number_str = str(number)
+    length = len(number_str)
+
+    part_1 = [int(x) for x in number_str[:int(length // 2)]]
+
+    if length % 2 == 0:
+        part_2 = [int(x) for x in number_str[int(length // 2):]]
+    else:
+        part_2 = [int(x) for x in number_str[int(length // 2) + 1:]]
+
+    return sum(part_1) == sum(part_2)
+
+
+def is_palindrome(number):
+    number_str = str(number)
+    length = len(number_str)
+
+    part_1 = [int(x) for x in number_str[:int(length // 2)]]
+
+    if length % 2 == 0:
+        part_2 = [int(x) for x in number_str[int(length // 2):]]
+    else:
+        part_2 = [int(x) for x in number_str[int(length // 2) + 1:]]
+
+    return part_1 == part_2[::-1]
+
+
+happy_primes_100 = primes_number_generator(n=100, number_type=is_happy)
+for prime in happy_primes_100:
+    print(prime, end=', ')
