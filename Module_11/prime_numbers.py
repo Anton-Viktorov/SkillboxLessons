@@ -83,15 +83,6 @@ for prime in primes_100:
     print(prime, end=', ')
 
 
-# def prime_numbers_generator(n):
-#     pass
-#     # TODO здесь ваш код
-#
-#
-# for number in prime_numbers_generator(n=10000):
-#     print(number)
-
-
 # Часть 3
 # Написать несколько функций-фильтров, которые выдает True, если число:
 # 1) "счастливое" в обыденном пониманиии - сумма первых цифр равна сумме последних
