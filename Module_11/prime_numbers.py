@@ -66,10 +66,21 @@ for number in prime_number_iterator:
     print(number, end=', ')
 
 
-# TODO после подтверждения части 1 преподователем, можно делать
 # Часть 2
 # Теперь нужно создать генератор, который выдает последовательность простых чисел до n
 # Распечатать все простые числа до 10000 в столбик
+def primes_number_generator(n):
+    for prime in range(2, n+1):
+        for x in range(2, int(prime ** 0.5) + 1):
+            if prime % x == 0:
+                break
+        else:
+            yield prime
+
+
+primes_100 = primes_number_generator(100)
+for prime in primes_100:
+    print(prime, end=', ')
 
 
 # def prime_numbers_generator(n):
