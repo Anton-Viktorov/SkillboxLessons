@@ -32,7 +32,7 @@ def event_reader(filename):
         # Надеюсь я правильно тебя понял. А то моя конструкция меня озадачила.
 
         if 'NOK' in log_type:
-            counter += int(True)
+            counter += int(True)        # TODO: 'NOK' in log_type дает True или False сам по себе.
 
         for line in file:
 

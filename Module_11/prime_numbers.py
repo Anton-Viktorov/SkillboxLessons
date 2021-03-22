@@ -94,6 +94,7 @@ def primes_number_generator(n):
             if prime % x == 0:
                 break
         else:
+            # TODO: условие от сюда вынести. в цикл, где вызывается primes_number_generator
             if list(filter(lambda x: is_happy(x) and is_palindrome(x), [prime])):
                 yield prime
 
@@ -125,9 +126,20 @@ def is_palindrome(number):
 
     # Чисто через срез не получилось реализовать эту механику. Было много попыток, когда в строке
     # нечетное кол-во чисел срабатывало, но с четным была проблема.
+
+    # TODO: ну как так-то) должно было получиться!
+    #  s='123456'
+    #  s[:2:-1]     # '654'
+    #  .
+    #  т.о. для любого числа берем первые N//2 чисел и крайние N//2 чисел.
+    #  .
+    #  с reversed неплохо придумано, и работает кстати так же быстро. Но так не принято, поэтому это палит, что с
+    #  индексами не в ладах. И тогда начну закидывать вопросы по инексам.
     return part_1 == part_2
 
 
+# TODO: вот тут filter внтурь filter и т.д. а самой глубине primes_number_generator.
+#  ВНИМАНИЕ: if/else или ana\or не использовать. Нужно именно каскад filter`ов собрать.
 happy_primes_100 = primes_number_generator(n=1000)
 for prime in happy_primes_100:
     print(prime, end=', ')
