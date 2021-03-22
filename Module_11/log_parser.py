@@ -31,8 +31,9 @@ def event_reader(filename):
 
         # Надеюсь я правильно тебя понял. А то моя конструкция меня озадачила.
 
-        if 'NOK' in log_type:
-            counter += int(True)        # TODO: 'NOK' in log_type дает True или False сам по себе.
+        counter += int('NOK' in log_type)
+
+        # TO DO: 'NOK' in log_type дает True или False сам по себе.
 
         for line in file:
 
@@ -40,11 +41,10 @@ def event_reader(filename):
 
             if time != current_time:
                 yield f'[{date} {current_time}] {counter}'
-                counter *= int(False)
+                counter = 0
                 current_time = time
 
-            if 'NOK' in log_type:
-                counter += int(True)
+            counter += int('NOK' in log_type)
 
         yield f'[{date} {current_time}] {counter}'
 

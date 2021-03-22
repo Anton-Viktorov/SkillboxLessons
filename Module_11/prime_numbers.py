@@ -94,9 +94,8 @@ def primes_number_generator(n):
             if prime % x == 0:
                 break
         else:
-            # TODO: условие от сюда вынести. в цикл, где вызывается primes_number_generator
-            if list(filter(lambda x: is_happy(x) and is_palindrome(x), [prime])):
-                yield prime
+            # TO DO: условие от сюда вынести. в цикл, где вызывается primes_number_generator
+            yield prime
 
 
 def is_happy(number):
@@ -113,8 +112,10 @@ def is_palindrome(number):
     number_str = str(number)
     length = len(number_str)
 
-    part_1 = [int(x) for x in number_str[:length // 2]]
-    part_2 = [int(x) for x in reversed(number_str[- (length // 2):])]
+    part_1 = number_str[:length // 2]
+    part_2 = number_str[:-(length // 2 + 1):-1]
+
+    return part_1 == part_2
 
     # TO DO: срез! Пример:
     #  'abcde'[-2:]     # 'de'
@@ -127,7 +128,7 @@ def is_palindrome(number):
     # Чисто через срез не получилось реализовать эту механику. Было много попыток, когда в строке
     # нечетное кол-во чисел срабатывало, но с четным была проблема.
 
-    # TODO: ну как так-то) должно было получиться!
+    # TO DO: ну как так-то) должно было получиться!
     #  s='123456'
     #  s[:2:-1]     # '654'
     #  .
@@ -135,14 +136,14 @@ def is_palindrome(number):
     #  .
     #  с reversed неплохо придумано, и работает кстати так же быстро. Но так не принято, поэтому это палит, что с
     #  индексами не в ладах. И тогда начну закидывать вопросы по инексам.
-    return part_1 == part_2
 
-
-# TODO: вот тут filter внтурь filter и т.д. а самой глубине primes_number_generator.
+# TO DO: вот тут filter внтурь filter и т.д. а самой глубине primes_number_generator.
 #  ВНИМАНИЕ: if/else или ana\or не использовать. Нужно именно каскад filter`ов собрать.
+
+
 happy_primes_100 = primes_number_generator(n=1000)
-for prime in happy_primes_100:
-    print(prime, end=', ')
+for item in filter(is_palindrome, list(filter(is_happy, happy_primes_100))):
+    print(item, end=', ')
 
 # TO DO: смотрел человеческую многоножку?
 #  подцепи через встроенную filter все созданные функции-фильтрации подряд
