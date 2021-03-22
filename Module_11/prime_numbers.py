@@ -88,13 +88,13 @@ class PrimeNumbers:
 # Подсказка: возможно, нужно будет добавить параметр в итератор/генератор.
 
 
-def primes_number_generator(n, number_type):
+def primes_number_generator(n):
     for prime in range(2, n+1):
         for x in range(2, int(prime ** 0.5) + 1):
             if prime % x == 0:
                 break
         else:
-            if number_type(prime):
+            if list(filter(lambda x: is_happy(x) and is_palindrome(x), [prime])):
                 yield prime
 
 
@@ -102,14 +102,8 @@ def is_happy(number):
     number_str = str(number)
     length = len(number_str)
 
-    part_1 = [int(x) for x in number_str[:int(length // 2)]]
-
-    if length % 2 == 0:
-        part_2 = [int(x) for x in number_str[int(length // 2):]]
-    else:
-        # TODO: используй срез "последние N//2 чисел", тогда "+1" не играет никакой роли и if удалим.
-        part_2 = [int(x) for x in number_str[int(length // 2) + 1:]]
-    # TODO: // - деление с отбрасыванием остатка. Возвращает int по умолчанию.
+    part_1 = [int(x) for x in number_str[:length // 2]]
+    part_2 = [int(x) for x in number_str[- (length // 2):]]
 
     return sum(part_1) == sum(part_2)
 
@@ -118,26 +112,25 @@ def is_palindrome(number):
     number_str = str(number)
     length = len(number_str)
 
-    part_1 = [int(x) for x in number_str[:int(length // 2)]]
+    part_1 = [int(x) for x in number_str[:length // 2]]
+    part_2 = [int(x) for x in reversed(number_str[- (length // 2):])]
 
-    # TODO: срез! Пример:
+    # TO DO: срез! Пример:
     #  'abcde'[-2:]     # 'de'
-    if length % 2 == 0:
-        part_2 = [int(x) for x in number_str[int(length // 2):]]
-    else:
-        part_2 = [int(x) for x in number_str[int(length // 2) + 1:]]
-
-    # TODO: в идеале, надо смочь сделать срез одним ударом. Сразу с отрицатльным шагом.
+    # TO DO: в идеале, надо смочь сделать срез одним ударом. Сразу с отрицатльным шагом.
     #  "part_2[::-1]" - лишнее действие, что тратит время.
     #  .
     #  Сам я на память такое не напишу. Такие срезы - одна моих слабых точек. Но если я не на собесе, и есть возможность
     #  через cmd нащупать границы, я это делаю.
-    return part_1 == part_2[::-1]
+
+    # Чисто через срез не получилось реализовать эту механику. Было много попыток, когда в строке
+    # нечетное кол-во чисел срабатывало, но с четным была проблема.
+    return part_1 == part_2
 
 
-happy_primes_100 = primes_number_generator(n=100, number_type=is_happy)
+happy_primes_100 = primes_number_generator(n=1000)
 for prime in happy_primes_100:
     print(prime, end=', ')
 
-# TODO: смотрел человеческую многоножку?
+# TO DO: смотрел человеческую многоножку?
 #  подцепи через встроенную filter все созданные функции-фильтрации подряд
