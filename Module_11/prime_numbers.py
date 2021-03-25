@@ -142,7 +142,7 @@ def is_palindrome(number):
 
 
 happy_primes_100 = primes_number_generator(n=1000)
-for item in filter(is_palindrome, list(filter(is_happy, happy_primes_100))):
+for item in filter(is_palindrome, filter(is_happy, happy_primes_100)):
     print(item, end=', ')
 
 # TO DO: смотрел человеческую многоножку?

@@ -5,62 +5,78 @@ from collections import defaultdict
 
 class TradesParser:
 
-    def __init__(self, file_name):
-        self.path = f'trades/{file_name}'
+    def __init__(self):
         self.tikers = defaultdict(int)
         self.tikers_zero = defaultdict(int)
 
     def run(self):
-        with open(f"{self.path}", newline='') as ff:
-            reader = csv.reader(ff)
-            next(reader)
+        try:
+            file = main.get_file()
+            with open(f"trades/{file}", newline='') as ff:
+                reader = csv.reader(ff)
+                next(reader)
 
-            max_price = 0
-            min_price = float("inf")
+                max_price = 0
+                min_price = float("inf")
 
-            for row in reader:
-                tiker = row[0]
-                price = float(row[2])
-                max_price = max(max_price, price)
-                min_price = min(min_price, price)
+                for row in reader:
+                    tiker = row[0]
+                    price = float(row[2])
+                    max_price = max(max_price, price)
+                    min_price = min(min_price, price)
 
-            average_price = (max_price + min_price) / 2
-            volatility = round(((max_price - min_price) / average_price) * 100, 1)
-            if volatility == 0:
-                self.tikers_zero[tiker] = volatility
-            else:
-                self.tikers[tiker] = volatility
+                average_price = (max_price + min_price) / 2
+                volatility = round(((max_price - min_price) / average_price) * 100, 1)
+                if volatility == 0:
+                    self.tikers_zero[tiker] = volatility
+                else:
+                    self.tikers[tiker] = volatility
+        except StopIteration:
+            pass
+        else:
+            self.run()
 
 
-def main():
-    tikers = []
-    tikers_zero = []
-    file_list = os.listdir(path='trades/')
-    parsers = [TradesParser(file_name=file) for file in file_list]
-    for parser in parsers:
-        parser.run()
+class ThreadManager:
 
-    for parser in parsers:
-        tikers += list(parser.tikers.items())
-        tikers_zero += list(parser.tikers_zero.keys())
+    def __init__(self, threads_amt=4):
+        self.path = 'trades/'
+        self.total_tikers = []
+        self.total_tikers_zero = []
+        self.file_list = iter(os.listdir(self.path))
+        self.threads_amt = threads_amt
 
-    tikers.sort(key=lambda i: i[1], reverse=True)
-    tikers_zero.sort()
+    def get_file(self):
+        return next(self.file_list)
 
-    print('Максимальная волатильность:\n')
-    for tiker in tikers[:3]:
-        print(f"Tiker: {tiker[0]} Volatility: {tiker[1]}")
+    def run(self):
+        parsers = [TradesParser() for _ in range(self.threads_amt)]
+        for parser in parsers:
+            parser.run()
 
-    print('Минимальная волатильность:\n')
-    for tiker in tikers[-3:]:
-        print(f"Tiker: {tiker[0]} Volatility: {tiker[1]}")
+        for parser in parsers:
+            self.total_tikers += list(parser.tikers.items())
+            self.total_tikers_zero += list(parser.tikers_zero.keys())
 
-    print(f'Нулевая волатильность: {tikers_zero}')
+        self.total_tikers.sort(key=lambda i: i[1], reverse=True)
+        self.total_tikers_zero.sort()
 
-    # TODO: можно сказать, что в main класс - Менеджер, который должен управлять парсингом и в будущем будет создавать
-    #  потоки. Упакую его в класс. Подсказка: записать все в run будет ошибкой. Менеджер будет один и у него должны
-    #  быть понятные методы.
+        print('Максимальная волатильность:\n')
+        for tiker in self.total_tikers[:3]:
+            print(f"Tiker: {tiker[0]} Volatility: {tiker[1]}")
+
+        print('Минимальная волатильность:\n')
+        for tiker in self.total_tikers[-3:]:
+            print(f"Tiker: {tiker[0]} Volatility: {tiker[1]}")
+
+        print(f'Нулевая волатильность: {self.total_tikers_zero}')
+
+
+# TO DO: можно сказать, что в main класс - Менеджер, который должен управлять парсингом и в будущем будет создавать
+#  потоки. Упакую его в класс. Подсказка: записать все в run будет ошибкой. Менеджер будет один и у него должны
+#  быть понятные методы.
 
 
 if __name__ == '__main__':
-    main()
+    main = ThreadManager()
+    main.run()
