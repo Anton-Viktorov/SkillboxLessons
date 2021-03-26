@@ -42,9 +42,9 @@ class ThreadManager:
         self.threads_amt = threads_amt
 
     def get_file(self):
-        # TODO: когда _ несколько раз подряд, их можно "запаковать" (так не говорят, это между нами).
+        # TO DO: когда _ несколько раз подряд, их можно "запаковать" (так не говорят, это между нами).
         #  for *_, files in ....
-        for _, _, files in os.walk(self.path):
+        for *_, files in os.walk(self.path):
             for file in files:
                 yield file
 
