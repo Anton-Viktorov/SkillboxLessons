@@ -7,8 +7,8 @@ class TradesParser:
 
     def __init__(self, manager):
         self.manager = manager
-        self.tikers = {}
-        self.tikers_zero = []
+        self.tickers = {}
+        self.tickers_zero = []
 
     def run(self):
         for file in self.manager.get_file():
@@ -20,7 +20,7 @@ class TradesParser:
                 min_price = float("inf")
 
                 for row in reader:
-                    tiker, _, price, _ = row
+                    ticker, _, price, _ = row
                     max_price = max(max_price, float(price))
                     min_price = min(min_price, float(price))
 
@@ -28,23 +28,32 @@ class TradesParser:
 
                 volatility = ((max_price - min_price) / average_price) * 100
                 if volatility == 0:
-                    self.tikers_zero.append(tiker)
+                    self.tickers_zero.append(ticker)
                 else:
-                    self.tikers[tiker] = volatility
+                    self.tickers[ticker] = volatility
 
 
 class ThreadManager:
 
     def __init__(self, threads_amt=1):
         self.path = 'trades'
-        self.total_tikers = []
-        self.total_tikers_zero = []
+        self.total_tickers = []
+        self.total_tickers_zero = []
         self.threads_amt = threads_amt
 
     def get_file(self):
+        # TODO: когда _ несколько раз подряд, их можно "запаковать" (так не говорят, это между нами).
+        #  for *_, files in ....
         for _, _, files in os.walk(self.path):
             for file in files:
                 yield file
+
+        # TODO: по поводу подхода "выдавать имена файлов по запросу" у меня есть определенные сомнения.
+        #  Подозреваю, что при работе с несколькими потоками, тут будет проблемы и нужно будет с ними как-то разбираться
+        #  Но это значит, что подход плох. Просто это надо учесть.
+        #  .
+        #  Альтернативное решение: собрать список всех файлов и разделить на Х одинаковых куч. Но если их 100млн штук,
+        #  тогда это все будет храниться в памяти. Поэтому твой подход круче, но малость сложнее.
 
     def run(self):
         parsers = [TradesParser(manager=self) for _ in range(self.threads_amt)]
@@ -52,26 +61,25 @@ class ThreadManager:
             parser.run()
 
         for parser in parsers:
-            self.total_tikers += list(parser.tikers.items())
-            self.total_tikers_zero += list(parser.tikers_zero)
+            self.total_tickers += list(parser.tickers.items())
+            self.total_tickers_zero += list(parser.tickers_zero)
 
     def sort_result(self):
-        self.total_tikers.sort(key=operator.itemgetter(1), reverse=True)
-        self.total_tikers_zero.sort()
+        self.total_tickers.sort(key=operator.itemgetter(1), reverse=True)
+        self.total_tickers_zero.sort()
 
     def print_result(self):
         self.sort_result()
-        print('Максимальная волатильность:\n')
 
-        for tiker, volatility in self.total_tikers[:3]:
-            print(f"Tiker: {tiker} Volatility: {round(volatility, 1)}")
+        print('Максимальная волатильность:\n')
+        for ticker, volatility in self.total_tickers[:3]:
+            print(f"Tiker: {ticker} Volatility: {round(volatility, 1)}")
 
         print('Минимальная волатильность:\n')
+        for ticker, volatility in self.total_tickers[-3:]:
+            print(f"Tiker: {ticker} Volatility: {round(volatility, 1)}")
 
-        for tiker, volatility in self.total_tikers[-3:]:
-            print(f"Tiker: {tiker} Volatility: {round(volatility, 1)}")
-
-        print(f'Нулевая волатильность: {self.total_tikers_zero}')
+        print(f'Нулевая волатильность: {self.total_tickers_zero}')
 
 
 if __name__ == '__main__':
