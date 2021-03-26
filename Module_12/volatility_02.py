@@ -19,9 +19,13 @@ class TradesParser(Thread):
         while True:
             try:
                 with self.generator_lock:
+                    self.manager.generator_calls += 1
                     file = next(self.generator)
             except StopIteration:
                 break
+
+            # TODO: else тут лишний. Он сдвинул весь код правее. Чем больше вложенность, тем хуже читабельность.
+            #  В except стоит break.
             else:
                 with open(os.path.join('trades', file), newline='') as ff:
                     reader = csv.reader(ff)
@@ -53,6 +57,7 @@ class ThreadManager:
         self.threads_amt = threads_amt
         self.lock = threading.Lock()
         self.file_generator = self.get_file()
+        self.generator_calls = 0
 
     def get_file(self):
         for *_, files in os.walk(self.path):
@@ -79,15 +84,17 @@ class ThreadManager:
     def print_result(self):
         self.sort_result()
 
-        print('Максимальная волатильность:\n')
+        print('Максимальная волатильность:')
         for ticker, volatility in self.total_tickers[:3]:
             print(f"Ticker: {ticker} Volatility: {round(volatility, 1)}")
 
-        print('Минимальная волатильность:\n')
+        print('\nМинимальная волатильность:')
         for ticker, volatility in self.total_tickers[-3:]:
             print(f"Ticker: {ticker} Volatility: {round(volatility, 1)}")
 
-        print(f'Нулевая волатильность: {self.total_tickers_zero}')
+        print(f'\nНулевая волатильность: {self.total_tickers_zero}')
+
+        print(f'\nВсего обращений к генератору: {self.generator_calls}. Файлов: 112')
 
 
 if __name__ == '__main__':
