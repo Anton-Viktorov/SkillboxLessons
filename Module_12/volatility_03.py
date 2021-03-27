@@ -1,31 +1,19 @@
 import os
 import csv
 import operator
-import threading
-from threading import Thread
+from multiprocessing import Pipe, Process
 
 
-class TradesParser(Thread):
-
-    def __init__(self, manager, generator, lock, *args, **kwargs):
+class TradesParser(Process):
+    def __init__(self, pipe, file_list, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.manager = manager
         self.tickers = {}
         self.tickers_zero = []
-        self.generator = generator
-        self.generator_lock = lock
+        self.pipe = pipe
+        self.files_list = file_list
 
     def run(self):
-        while True:
-            try:
-                with self.generator_lock:
-                    self.manager.generator_calls += 1
-                    file = next(self.generator)
-            except StopIteration:
-                break
-
-            # TO DO: else тут лишний. Он сдвинул весь код правее. Чем больше вложенность, тем хуже читабельность.
-            #  В except стоит break.
+        for file in self.files_list:
             with open(os.path.join('trades', file), newline='') as ff:
                 reader = csv.reader(ff)
                 next(reader)
@@ -46,35 +34,49 @@ class TradesParser(Thread):
                 else:
                     self.tickers[ticker] = volatility
 
+        self.pipe.send([list(self.tickers.items()), self.tickers_zero])
+        self.pipe.close()
+
 
 class ThreadManager:
 
-    def __init__(self, threads_amt=4):
+    def __init__(self, process_amt=4):
         self.path = 'trades'
+        self.file_list = os.listdir(self.path)
         self.total_tickers = []
         self.total_tickers_zero = []
-        self.threads_amt = threads_amt
-        self.lock = threading.Lock()
-        self.file_generator = self.get_file()
-        self.generator_calls = 0
+        self.process_amt = process_amt
+        self.files_amt = len(self.file_list) // self.process_amt
 
-    def get_file(self):
-        for *_, files in os.walk(self.path):
-            for file in files:
-                yield file
+    # def get_file(self):
+    #     for file in self.file_list:
+    #         self.file_queue.put(file)
 
     def run(self):
-        parsers = [TradesParser(manager=self, generator=self.file_generator, lock=self.lock)
-                   for _ in range(self.threads_amt)]
+        parsers = []
+        pipes = []
+        for parser in range(self.process_amt - 1):
+            manager_pipe, parser_pipe = Pipe()
+            files = [self.file_list.pop() for _ in range(self.files_amt)]
+            parser = TradesParser(pipe=parser_pipe, file_list=files)
+            parsers.append(parser)
+            pipes.append(manager_pipe)
+
+        manager_pipe, parser_pipe = Pipe()
+        parser = TradesParser(pipe=parser_pipe, file_list=self.file_list)
+        parsers.append(parser)
+        pipes.append(manager_pipe)
+
         for parser in parsers:
             parser.start()
 
         for parser in parsers:
             parser.join()
 
-        for parser in parsers:
-            self.total_tickers += list(parser.tickers.items())
-            self.total_tickers_zero += list(parser.tickers_zero)
+        for pipe in pipes:
+            tickers, tickers_zero = pipe.recv()
+            self.total_tickers += tickers
+            self.total_tickers_zero += tickers_zero
 
     def sort_result(self):
         self.total_tickers.sort(key=operator.itemgetter(1), reverse=True)
@@ -92,6 +94,8 @@ class ThreadManager:
             print(f"Ticker: {ticker} Volatility: {round(volatility, 1)}")
 
         print(f'\nНулевая волатильность: {self.total_tickers_zero}')
+
+        print(len(self.total_tickers) + len(self.total_tickers_zero))
 
 
 if __name__ == '__main__':
