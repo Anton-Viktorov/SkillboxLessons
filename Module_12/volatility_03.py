@@ -2,6 +2,7 @@ import os
 import operator
 from multiprocessing import Process, Queue
 from queue import Empty
+import math
 import csv
 
 
@@ -31,8 +32,8 @@ class TradesParser(Process):
 
                 volatility = ((max_price - min_price) / average_price) * 100
 
-                # TODO: как короче начинать "tuple([ticker, volatility])"?
-                self.result_queue.put(tuple([ticker, volatility]))
+                # TO DO: как короче начинать "tuple([ticker, volatility])"?
+                self.result_queue.put((ticker, volatility,))
 
 
 class ProcessManager:
@@ -43,36 +44,33 @@ class ProcessManager:
         self.total_tickers = []
         self.total_tickers_zero = []
         self.process_amt = process_amt
-        # TODO: Завяжи размер на число исполнителей. вдруг их будет 32? (на сервере вполне может быть и 100)
-        self.result_queue = Queue(maxsize=16)
+        # TO DO: Завяжи размер на число исполнителей. вдруг их будет 32? (на сервере вполне может быть и 100)
+        self.result_queue = Queue(maxsize=self.process_amt * 4)
 
-        # TODO: раздели и округли в большую сторону ...
-        self.files_amt = len(self.file_list) // self.process_amt
+        # TO DO: раздели и округли в большую сторону ...
+        self.files_amt = math.ceil(len(self.file_list) / self.process_amt)
 
     def run(self):
         parsers = []
-        for parser in range(self.process_amt - 1):
-            files = [self.file_list.pop() for _ in range(self.files_amt)]
+        for parser in range(self.process_amt):
+            files = [self.file_list.pop() for _ in range(self.files_amt) if len(self.file_list) != 0]
             parser = TradesParser(file_list=files, queue=self.result_queue)
             parsers.append(parser)
-
-        # TODO: ... тогда этот код может будет убрать.
-        parser = TradesParser(file_list=self.file_list, queue=self.result_queue)
-        parsers.append(parser)
 
         for parser in parsers:
             parser.start()
 
         while True:
             try:
-                # TODO: ну 5 секунд много. 0.5 более чем достаточно. Ведь если еще кто-то жив и ему попался жирный файл,
+                # TO DO: ну 5 секунд много. 0.5 более чем достаточно. Ведь если еще кто-то жив и
+                # ему попался жирный файл,
                 #  то цикл все равно не прервется.
-                ticker, volatility = self.result_queue.get(timeout=5)
+                ticker, volatility = self.result_queue.get(timeout=0.5)
                 if volatility == 0:
                     self.total_tickers_zero.append(ticker)
                 else:
-                    # TODO: упростить строку
-                    self.total_tickers.append(tuple([ticker, volatility]))
+                    # TO DO: упростить строку
+                    self.total_tickers.append((ticker, volatility,))
             except Empty:
                 if not any(parser.is_alive() for parser in parsers):
                     break
