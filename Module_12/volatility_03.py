@@ -32,10 +32,7 @@ class TradesParser(Process):
 
                 volatility = ((max_price - min_price) / average_price) * 100
 
-                # TODO: запятая не обязательна на конце, если в кортеже 2+ элемента
-                #  Её ставят, если нужен кортеж из 1го элемента: (x,) и (x,y).
-                #  Во втором месте тоже поправь.
-                self.result_queue.put((ticker, volatility,))
+                self.result_queue.put((ticker, volatility))
 
 
 class ProcessManager:
@@ -46,24 +43,14 @@ class ProcessManager:
         self.total_tickers = []
         self.total_tickers_zero = []
         self.process_amt = process_amt
-        # TO DO: Завяжи размер на число исполнителей. вдруг их будет 32? (на сервере вполне может быть и 100)
         self.result_queue = Queue(maxsize=self.process_amt * 4)
 
-        # TO DO: раздели и округли в большую сторону ...
         self.files_amt = math.ceil(len(self.file_list) / self.process_amt)
 
     def run(self):
         parsers = []
-        for parser in range(self.process_amt):
-            # TODO:
-            #  внутри списокового включения не стоит выполнять print`ов, append`ов.
-            #  pop - Тоже на грани. Так обычно не пишут.
-            #  .
-            #  переменная parser, из цикла выше, это индекс парсера.
-            #  Используй этот индекс, чтобы взять нужны срез из self.file_list.
-            #  .
-            #  Кстати, индекс лучше назвать иначе. Даже i будет лучше.
-            files = [self.file_list.pop() for _ in range(self.files_amt) if len(self.file_list) != 0]
+        for i in range(self.process_amt):
+            files = self.file_list[i * self.files_amt:self.files_amt * (i+1)]
             parser = TradesParser(file_list=files, queue=self.result_queue)
             parsers.append(parser)
 
@@ -72,15 +59,11 @@ class ProcessManager:
 
         while True:
             try:
-                # TO DO: ну 5 секунд много. 0.5 более чем достаточно. Ведь если еще кто-то жив и
-                # ему попался жирный файл,
-                #  то цикл все равно не прервется.
                 ticker, volatility = self.result_queue.get(timeout=0.5)
                 if volatility == 0:
                     self.total_tickers_zero.append(ticker)
                 else:
-                    # TO DO: упростить строку
-                    self.total_tickers.append((ticker, volatility,))
+                    self.total_tickers.append((ticker, volatility))
             except Empty:
                 if not any(parser.is_alive() for parser in parsers):
                     break
@@ -110,6 +93,29 @@ if __name__ == '__main__':
     main_100500.run()
     main_100500.print_result()
 
+
+# TO DO: упростить строку
+
+# TO DO: ну 5 секунд много. 0.5 более чем достаточно. Ведь если еще кто-то жив и
+# ему попался жирный файл,
+#  то цикл все равно не прервется.
+
+# TO DO: раздели и округли в большую сторону ...
+
+# TO DO: Завяжи размер на число исполнителей. вдруг их будет 32? (на сервере вполне может быть и 100)
+
+# TO DO: запятая не обязательна на конце, если в кортеже 2+ элемента
+#  Её ставят, если нужен кортеж из 1го элемента: (x,) и (x,y).
+#  Во втором месте тоже поправь.
+
+# TO DO:
+#  внутри списокового включения не стоит выполнять print`ов, append`ов.
+#  pop - Тоже на грани. Так обычно не пишут.
+#  .
+#  переменная parser, из цикла выше, это индекс парсера.
+#  Используй этот индекс, чтобы взять нужны срез из self.file_list.
+#  .
+#  Кстати, индекс лучше назвать иначе. Даже i будет лучше.
 
 # TO DO: сначала импорт внутренних, потом скачанных, потом своих.
 #  csv - сторонний, не внутренний. Его импортируем в конце, после встроенных модулей.
