@@ -31,6 +31,7 @@ class TradesParser(Process):
 
                 volatility = ((max_price - min_price) / average_price) * 100
 
+                # TODO: как короче начинать "tuple([ticker, volatility])"?
                 self.result_queue.put(tuple([ticker, volatility]))
 
 
@@ -42,7 +43,10 @@ class ProcessManager:
         self.total_tickers = []
         self.total_tickers_zero = []
         self.process_amt = process_amt
+        # TODO: Завяжи размер на число исполнителей. вдруг их будет 32? (на сервере вполне может быть и 100)
         self.result_queue = Queue(maxsize=16)
+
+        # TODO: раздели и округли в большую сторону ...
         self.files_amt = len(self.file_list) // self.process_amt
 
     def run(self):
@@ -52,6 +56,7 @@ class ProcessManager:
             parser = TradesParser(file_list=files, queue=self.result_queue)
             parsers.append(parser)
 
+        # TODO: ... тогда этот код может будет убрать.
         parser = TradesParser(file_list=self.file_list, queue=self.result_queue)
         parsers.append(parser)
 
@@ -60,10 +65,13 @@ class ProcessManager:
 
         while True:
             try:
+                # TODO: ну 5 секунд много. 0.5 более чем достаточно. Ведь если еще кто-то жив и ему попался жирный файл,
+                #  то цикл все равно не прервется.
                 ticker, volatility = self.result_queue.get(timeout=5)
                 if volatility == 0:
                     self.total_tickers_zero.append(ticker)
                 else:
+                    # TODO: упростить строку
                     self.total_tickers.append(tuple([ticker, volatility]))
             except Empty:
                 if not any(parser.is_alive() for parser in parsers):
