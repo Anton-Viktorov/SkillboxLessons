@@ -32,7 +32,9 @@ class TradesParser(Process):
 
                 volatility = ((max_price - min_price) / average_price) * 100
 
-                # TO DO: как короче начинать "tuple([ticker, volatility])"?
+                # TODO: запятая не обязательна на конце, если в кортеже 2+ элемента
+                #  Её ставят, если нужен кортеж из 1го элемента: (x,) и (x,y).
+                #  Во втором месте тоже поправь.
                 self.result_queue.put((ticker, volatility,))
 
 
@@ -53,6 +55,14 @@ class ProcessManager:
     def run(self):
         parsers = []
         for parser in range(self.process_amt):
+            # TODO:
+            #  внутри списокового включения не стоит выполнять print`ов, append`ов.
+            #  pop - Тоже на грани. Так обычно не пишут.
+            #  .
+            #  переменная parser, из цикла выше, это индекс парсера.
+            #  Используй этот индекс, чтобы взять нужны срез из self.file_list.
+            #  .
+            #  Кстати, индекс лучше назвать иначе. Даже i будет лучше.
             files = [self.file_list.pop() for _ in range(self.files_amt) if len(self.file_list) != 0]
             parser = TradesParser(file_list=files, queue=self.result_queue)
             parsers.append(parser)
